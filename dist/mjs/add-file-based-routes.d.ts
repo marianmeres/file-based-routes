@@ -14,9 +14,8 @@ interface RouterLike {
     options: Function;
     use: Function;
 }
-export declare const addFileBasedRoutes: (router: Partial<RouterLike>, routesDir: string, { verbose, prefix, errHandler, }?: Partial<AddFileBasedRoutesOptions>) => Promise<{
+export declare const addFileBasedRoutes: (router: Partial<RouterLike>, routesDir: string, schema?: object, { verbose, prefix, errHandler, }?: Partial<AddFileBasedRoutesOptions>) => Promise<{
     router: Partial<RouterLike>;
-    schemaPaths: any;
-    schemaComponents: any;
+    schema: any;
 }>;
 export {};

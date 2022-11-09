@@ -1,9 +1,12 @@
 import { totalist } from 'totalist/sync';
+import merge from 'lodash/merge.js';
 import { createClog } from '@marianmeres/clog';
 import { isObject } from './utils/object-utils.js';
 const clog = createClog('file-based-routes');
 const isFn = (v) => typeof v === 'function';
-export const addFileBasedRoutes = async (router, routesDir, { verbose = false, prefix = '', errHandler = null, } = {}) => {
+export const addFileBasedRoutes = async (router, routesDir, 
+// openapi schema into which the paths description will be deep merged (if available)
+schema = {}, { verbose = false, prefix = '', errHandler = null, } = {}) => {
     const dirLabel = routesDir.slice(process.cwd().length);
     // prettier-ignore
     verbose && clog(`--> ${dirLabel} ${prefix ? `(prefix '${prefix}')` : ''} ...`);
@@ -86,15 +89,15 @@ export const addFileBasedRoutes = async (router, routesDir, { verbose = false, p
                             }
                         }
                     });
-                    // collect schemas
+                    // collect & deep merge schemas
                     if (paths) {
                         paths = isFn(paths) ? paths() : paths;
                         paths = { [_toOpenApiLike(route)]: { [method]: paths } };
-                        schemaPaths = { ...schemaPaths, ...paths };
+                        schemaPaths = merge({}, schemaPaths, paths);
                     }
                     if (components) {
                         components = isFn(components) ? components() : components;
-                        schemaComponents = { ...schemaComponents, ...components };
+                        schemaComponents = merge({}, schemaComponents, components);
                     }
                 }
             }
@@ -103,8 +106,17 @@ export const addFileBasedRoutes = async (router, routesDir, { verbose = false, p
             }
         });
     }
-    verbose && clog(`✔ Done ${dirLabel}`);
-    return { router, schemaPaths, schemaComponents };
+    verbose && clog(`✔ ${dirLabel}`);
+    return {
+        router,
+        // merge provided with
+        schema: merge({}, schema, {
+            paths: schemaPaths,
+            components: {
+                schemas: schemaComponents,
+            },
+        }),
+    };
 };
 // for now, just the most common use case (named param via ":" notation), so just:
 // /a/:b/c -> /a/{b}/c

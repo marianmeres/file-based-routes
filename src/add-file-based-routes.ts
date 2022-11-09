@@ -1,4 +1,5 @@
 import { totalist } from 'totalist/sync';
+import merge from 'lodash/merge.js';
 import { createClog } from '@marianmeres/clog';
 import { isObject } from './utils/object-utils.js';
 
@@ -27,6 +28,8 @@ interface RouterLike {
 export const addFileBasedRoutes = async (
 	router: Partial<RouterLike>,
 	routesDir: string,
+	// openapi schema into which the paths description will be deep merged (if available)
+	schema: object = {},
 	{
 		verbose = false,
 		prefix = '',
@@ -34,8 +37,7 @@ export const addFileBasedRoutes = async (
 	}: Partial<AddFileBasedRoutesOptions> = {}
 ): Promise<{
 	router: Partial<RouterLike>;
-	schemaPaths: any;
-	schemaComponents: any;
+	schema: any;
 }> => {
 	const dirLabel = routesDir.slice(process.cwd().length);
 	// prettier-ignore
@@ -132,15 +134,15 @@ export const addFileBasedRoutes = async (
 							}
 						});
 
-						// collect schemas
+						// collect & deep merge schemas
 						if (paths) {
 							paths = isFn(paths) ? paths() : paths;
 							paths = { [_toOpenApiLike(route)]: { [method]: paths } };
-							schemaPaths = { ...schemaPaths, ...paths };
+							schemaPaths = merge({}, schemaPaths, paths);
 						}
 						if (components) {
 							components = isFn(components) ? components() : components;
-							schemaComponents = { ...schemaComponents, ...components };
+							schemaComponents = merge({}, schemaComponents, components);
 						}
 					}
 				} catch (e) {
@@ -150,8 +152,17 @@ export const addFileBasedRoutes = async (
 		);
 	}
 
-	verbose && clog(`✔ Done ${dirLabel}`);
-	return { router, schemaPaths, schemaComponents };
+	verbose && clog(`✔ ${dirLabel}`);
+	return {
+		router,
+		// merge provided with
+		schema: merge({}, schema, {
+			paths: schemaPaths,
+			components: {
+				schemas: schemaComponents,
+			},
+		}),
+	};
 };
 
 // for now, just the most common use case (named param via ":" notation), so just:

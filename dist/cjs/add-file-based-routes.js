@@ -22,14 +22,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addFileBasedRoutes = void 0;
 const sync_1 = require("totalist/sync");
+const merge_js_1 = __importDefault(require("lodash/merge.js"));
 const clog_1 = require("@marianmeres/clog");
 const object_utils_js_1 = require("./utils/object-utils.js");
 const clog = (0, clog_1.createClog)('file-based-routes');
 const isFn = (v) => typeof v === 'function';
-const addFileBasedRoutes = async (router, routesDir, { verbose = false, prefix = '', errHandler = null, } = {}) => {
+const addFileBasedRoutes = async (router, routesDir, 
+// openapi schema into which the paths description will be deep merged (if available)
+schema = {}, { verbose = false, prefix = '', errHandler = null, } = {}) => {
     const dirLabel = routesDir.slice(process.cwd().length);
     // prettier-ignore
     verbose && clog(`--> ${dirLabel} ${prefix ? `(prefix '${prefix}')` : ''} ...`);
@@ -112,15 +118,15 @@ const addFileBasedRoutes = async (router, routesDir, { verbose = false, prefix =
                             }
                         }
                     });
-                    // collect schemas
+                    // collect & deep merge schemas
                     if (paths) {
                         paths = isFn(paths) ? paths() : paths;
                         paths = { [_toOpenApiLike(route)]: { [method]: paths } };
-                        schemaPaths = { ...schemaPaths, ...paths };
+                        schemaPaths = (0, merge_js_1.default)({}, schemaPaths, paths);
                     }
                     if (components) {
                         components = isFn(components) ? components() : components;
-                        schemaComponents = { ...schemaComponents, ...components };
+                        schemaComponents = (0, merge_js_1.default)({}, schemaComponents, components);
                     }
                 }
             }
@@ -129,8 +135,17 @@ const addFileBasedRoutes = async (router, routesDir, { verbose = false, prefix =
             }
         });
     }
-    verbose && clog(`✔ Done ${dirLabel}`);
-    return { router, schemaPaths, schemaComponents };
+    verbose && clog(`✔ ${dirLabel}`);
+    return {
+        router,
+        // merge provided with
+        schema: (0, merge_js_1.default)({}, schema, {
+            paths: schemaPaths,
+            components: {
+                schemas: schemaComponents,
+            },
+        }),
+    };
 };
 exports.addFileBasedRoutes = addFileBasedRoutes;
 // for now, just the most common use case (named param via ":" notation), so just:

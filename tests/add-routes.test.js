@@ -29,9 +29,16 @@ suite.test('adding routes works', async () => {
 		},
 	};
 
-	const { schemaPaths, schemaComponents } = await addFileBasedRoutes(
+	const { schema } = await addFileBasedRoutes(
 		router,
 		path.join(__dirname, './fixtures'),
+		{
+			openapi: '3.0.0',
+			info: {
+				title: 'Foo bar',
+			},
+			servers: [{ url: 'http://foo.com' }],
+		},
 		{
 			verbose: false,
 			prefix: '/foo',
@@ -53,12 +60,15 @@ suite.test('adding routes works', async () => {
 	assert(mdlwrs['/foo/a/:b/c'] === 2);
 	assert(Object.keys(mdlwrs).length === 1);
 
+	// clog(JSON.stringify(schema, null, 4));
+	assert(schema.openapi);
+
 	// paths, note the "{b}" segment
-	assert(schemaPaths['/foo/a/{b}'].post.description === 'hey ho');
+	assert(schema.paths['/foo/a/{b}'].post.description === 'hey ho');
 
 	// components schemas
-	assert(isObject(schemaComponents.User));
-	assert(isObject(schemaComponents.Foo));
+	assert(isObject(schema.components.schemas.User));
+	assert(isObject(schema.components.schemas.Foo));
 });
 
 export default suite;
