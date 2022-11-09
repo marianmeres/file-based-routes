@@ -1,5 +1,5 @@
 export default {
 	get() {
-		return 'must be hidden';
+		return 'must not be added';
 	},
 };

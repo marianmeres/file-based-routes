@@ -1,6 +1,6 @@
 # @marianmeres/file-based-routes
 
-Mirror filesystem to express app (or similar) endpoints. Automate generating
-openapi/swagger schema.
+Mirror filesystem to express (or polka) endpoints. Automate generating
+openapi schema.
 
 Work in progress...

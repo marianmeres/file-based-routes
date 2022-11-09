@@ -12,9 +12,11 @@ interface RouterLike {
     delete: Function;
     all: Function;
     options: Function;
+    use: Function;
 }
 export declare const addFileBasedRoutes: (router: Partial<RouterLike>, routesDir: string, { verbose, prefix, errHandler, }?: Partial<AddFileBasedRoutesOptions>) => Promise<{
     router: Partial<RouterLike>;
-    paths: {};
+    schemaPaths: any;
+    schemaComponents: any;
 }>;
 export {};
