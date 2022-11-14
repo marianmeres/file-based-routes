@@ -4,39 +4,21 @@ import { strict as assert } from 'node:assert';
 import { TestRunner } from '@marianmeres/test-runner';
 import { fileURLToPath } from 'node:url';
 import { createClog } from '@marianmeres/clog';
-import { addFileBasedRoutes } from '../dist/mjs/index.js';
+import { fileBasedRoutes } from '../dist/mjs/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const __basename = path.basename(__filename);
 
-const suite = new TestRunner(path.basename(fileURLToPath(import.meta.url)));
-const clog = createClog(false);
+const suite = new TestRunner(__basename);
+const clog = createClog(__basename);
 
 suite.test('adding routes works', async () => {
-	const routes = {};
-	const mdlwrs = {};
-
-	// dummy test handler
-	const createHandler = (m) => (route, handler) => (routes[`${m}: ${route}`] = true);
-
-	// mock
-	const router = {
-		get: createHandler('get  '),
-		post: createHandler('post '),
-		use: (route, mdlwr) => {
-			mdlwrs[route] ||= 0;
-			mdlwrs[route]++;
-		},
-	};
-
-	const { schema } = await addFileBasedRoutes(
-		router,
+	const { apply, schema } = await fileBasedRoutes(
 		path.join(__dirname, './fixtures'),
 		{
 			openapi: '3.0.0',
-			info: {
-				title: 'Foo bar',
-			},
+			info: { title: 'Foo bar', version: '1.2.3' },
 			servers: [{ url: 'http://foo.com' }],
 		},
 		{
@@ -45,7 +27,29 @@ suite.test('adding routes works', async () => {
 		}
 	);
 
-	// clog(routes, mdlwrs, JSON.stringify(schemaPaths, null, 2));
+	//
+	const routes = {};
+	const mdlwrs = {};
+
+	// dummy mock factory
+	const createHandler = (m) => (route, middlewares, handler) => {
+		routes[`${m}: ${route}`] = true;
+		middlewares.forEach((v) => {
+			mdlwrs[route] ||= 0;
+			mdlwrs[route]++;
+		});
+	};
+
+	// mock
+	const router = {
+		get: createHandler('get  '),
+		post: createHandler('post '),
+	};
+
+	// now add
+	apply(router);
+
+	// clog(routes, mdlwrs);
 	// clog(JSON.stringify(schemaComponents, null, 2));
 
 	// routes

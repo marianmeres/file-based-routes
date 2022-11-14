@@ -1,4 +1,4 @@
-import { yamlize } from '../../../../dist/mjs/index.js';
+import { yamlize } from '../../../../dist/mjs/lib/yamlize.js';
 
 export default {
 	get() {
@@ -34,7 +34,7 @@ export default {
 			Foo:
 				type: object
 				properties:
-					bar:
+					foo:
 						type: string
 		`),
 	},
