@@ -52,7 +52,6 @@
     "@marianmeres/clog": "^0.3.2",
     "@polka/send-type": "^0.5.2",
     "ajv": "^8.11.0",
-    "dlv": "^1.1.3",
     "express-openapi-validator": "^4.13.8",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
