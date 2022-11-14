@@ -1,6 +1,7 @@
 # @marianmeres/file-based-routes
 
-Mirror filesystem to express (or polka) endpoints. Automate generating
-openapi schema.
+## ...Work in progress...
 
-Work in progress...
+Mirror filesystem routes to express endpoints. Automate generating and validating openapi
+schema (and/or custom validation).
+

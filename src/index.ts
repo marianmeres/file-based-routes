@@ -4,7 +4,6 @@ import { createClog } from '@marianmeres/clog';
 import { isObject } from './lib/object.js';
 import Ajv from 'ajv';
 import { Express, Application, NextFunction, Request, Response } from 'express';
-import delve from 'dlv';
 
 const clog = createClog('file-based-routes');
 
@@ -15,7 +14,7 @@ class ValidationError extends Error {}
 interface AddFileBasedRoutesOptions {
 	verbose: boolean;
 	prefix: string;
-	// custom validators outside of the whole schema
+	// custom validators outside of the openapi schema
 	validateRouteParams: boolean;
 	validateRequestBody: boolean;
 }
@@ -43,7 +42,7 @@ export const fileBasedRoutes = async (
 	{
 		verbose = false,
 		prefix = '',
-		// custom validators outside of the whole schema
+		// custom validators outside of the openapi validation
 		validateRouteParams = false,
 		validateRequestBody = false,
 	}: Partial<AddFileBasedRoutesOptions> = {}
@@ -194,7 +193,6 @@ const _createParamsValidator = (parameters: any[], components) => {
 			Object.entries(validator).forEach((entry: any) => {
 				const [name, validate] = entry;
 				if (!(validate as any)(req.params[name])) {
-					// prettier-ignore
 					const e: any = new ValidationError(`Param '${name}' is not valid`);
 					e.errors = validate.errors;
 					e.status = 400; // bad request
@@ -224,21 +222,13 @@ const _createRequestBodyValidator = (requestBody, components) => {
 			if (!validate(req.body)) {
 				const e: any = new ValidationError(`Request body is not valid`);
 				e.errors = validate.errors;
-				e.status = 400; // bad request
+				e.status = 400;
 				throw e;
 			}
 			next();
 		} catch (e) {
 			next(e);
 		}
-		// // clog(1111, JSON.stringify(components, null, 4));
-		// // clog(2222, JSON.stringify(requestBody, null, 4));
-		// clog(1234, JSON.stringify(schema, null, 4));
-		// //
-		// // // }
-		// // clog(3333, JSON.stringify(req.body, null, 4));
-		// // clog(4444, JSON.stringify(components, null, 4));
-		// next();
 	};
 };
 
