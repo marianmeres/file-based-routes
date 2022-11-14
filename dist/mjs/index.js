@@ -12,7 +12,7 @@ const ajv = new Ajv({ strict: false, validateFormats: false });
 export const fileBasedRoutes = async (routesDir, 
 // openapi schema into which the paths description will be deep merged (if available)
 schema = {}, { verbose = false, prefix = '', 
-// custom validators outside of the whole schema
+// custom validators outside of the openapi validation
 validateRouteParams = false, validateRequestBody = false, } = {}) => {
     const dirLabel = routesDir.slice(process.cwd().length);
     // prettier-ignore
@@ -133,7 +133,6 @@ const _createParamsValidator = (parameters, components) => {
             Object.entries(validator).forEach((entry) => {
                 const [name, validate] = entry;
                 if (!validate(req.params[name])) {
-                    // prettier-ignore
                     const e = new ValidationError(`Param '${name}' is not valid`);
                     e.errors = validate.errors;
                     e.status = 400; // bad request
@@ -164,7 +163,7 @@ const _createRequestBodyValidator = (requestBody, components) => {
             if (!validate(req.body)) {
                 const e = new ValidationError(`Request body is not valid`);
                 e.errors = validate.errors;
-                e.status = 400; // bad request
+                e.status = 400;
                 throw e;
             }
             next();
@@ -172,14 +171,6 @@ const _createRequestBodyValidator = (requestBody, components) => {
         catch (e) {
             next(e);
         }
-        // // clog(1111, JSON.stringify(components, null, 4));
-        // // clog(2222, JSON.stringify(requestBody, null, 4));
-        // clog(1234, JSON.stringify(schema, null, 4));
-        // //
-        // // // }
-        // // clog(3333, JSON.stringify(req.body, null, 4));
-        // // clog(4444, JSON.stringify(components, null, 4));
-        // next();
     };
 };
 // for now, just the most common ":named" param use case), so: /a/:b/c -> /a/{b}/c
