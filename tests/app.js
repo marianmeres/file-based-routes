@@ -13,14 +13,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const __basename = path.basename(__filename);
 
-//
-const _setup =
-	(k, c) =>
-	(...a) =>
-		console[k].apply(
-			null,
-			a.map((v) => c(v))
-		);
+// prettier-ignore
+const _setup = (k, c) => (...a) => console[k].apply(null, a.map((v) => c(v)));
 createClog.CONFIG.WRITER = {
 	debug: _setup('debug', gray),
 	log: _setup('log', gray),
@@ -86,7 +80,7 @@ app.listen(PORT, HOST, async () => {
 	);
 
 	// NOW apply (below validator middleware)
-	fbr1.apply(app);
+	await fbr1.apply(app);
 
 	// app.use((err, req, res, next) => res.status(500).end(err.toString()));
 	app.use((err, req, res, next) => {
@@ -102,7 +96,7 @@ app.listen(PORT, HOST, async () => {
 // no
 app2.listen(PORT2, HOST, async () => {
 	common(app2, clog2);
-	fbr2.apply(app2);
+	await fbr2.apply(app2);
 	app2.use((err, req, res, next) => {
 		res.status(err.status || err.code || 500).json({
 			message: err.message,

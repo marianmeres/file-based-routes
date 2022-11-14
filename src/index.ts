@@ -88,8 +88,14 @@ export const fileBasedRoutes = async (
 			(method) => {
 				const METHOD = method.toUpperCase();
 				try {
+					// using factory instead of plain handler to allow more control
+					let createHandlerFn: (
+						app: Partial<RouterLike> | Express | Application,
+						route: string,
+						method: string
+					) => (req: Request, res: Response, next: NextFunction) => void;
+					//
 					let middlewares;
-					let handlerFn;
 					// schemas
 					let paths;
 					let components;
@@ -97,11 +103,19 @@ export const fileBasedRoutes = async (
 					// supported shapes are:
 					// { method: fn }
 					if (isFn(handler[method])) {
-						handlerFn = handler[method];
+						// normalize to factory
+						createHandlerFn = () => handler[method];
 					}
 					// or { method: { middlewares: [...fns], handler: fn, schemas... } }
-					else if (isObject(handler[method]) && isFn(handler[method].handler)) {
-						handlerFn = handler[method].handler;
+					// or { method: { middlewares: [...fns], createHandler: () => handler, schemas... } }
+					else if (isObject(handler[method])) {
+						// factory has higher priority
+						if (isFn(handler[method].createHandler)) {
+							createHandlerFn = handler[method].createHandler;
+						} else if (isFn(handler[method].handler)) {
+							// normalize to factory
+							createHandlerFn = () => handler[method].handler;
+						}
 						middlewares = handler[method].middleware;
 						paths = handler[method].schemaPaths;
 						components = handler[method].schemaComponents;
@@ -112,12 +126,12 @@ export const fileBasedRoutes = async (
 					middlewares = middlewares.filter(isFn);
 
 					// fail early on invalid route def...
-					if (handler[method] && !isFn(handlerFn)) {
+					if (handler[method] && !isFn(createHandlerFn)) {
 						throw new Error(`Invalid route definition/handler...`);
 					}
 
 					//
-					if (isFn(handlerFn)) {
+					if (isFn(createHandlerFn)) {
 						// to avoid ambiguity: /a/b.js vs /a/b/index.js
 						if (_seen[METHOD + route]) throw new Error(`Route already added!`);
 						_seen[METHOD + route] = true;
@@ -150,7 +164,8 @@ export const fileBasedRoutes = async (
 						}
 
 						// collect all "method" functions into an array...
-						methodFns.push((app: Partial<RouterLike>) => {
+						methodFns.push(async (app: Partial<RouterLike>) => {
+							const handlerFn = await createHandlerFn(app, route, method);
 							// note: NOT polka compatible...
 							app[method](
 								route,
@@ -175,14 +190,18 @@ export const fileBasedRoutes = async (
 	verbose && clog(`✔ ${dirLabel}`);
 
 	return {
-		apply: (app) => methodFns.forEach((fn) => fn(app)),
+		apply: async (app) => {
+			for (const fn of methodFns) await fn(app);
+		},
 		schema: _buildSchema(schemaPaths, schemaComponents, schema),
 	};
 };
 
+//
 const _buildSchema = (paths, components, existing = {}) =>
 	merge({}, existing, { paths, components: { schemas: components } });
 
+//
 const _createParamsValidator = (parameters: any[], components) => {
 	const validator = (parameters || []).reduce((m, p) => {
 		if (p.name && p.schema) m[p.name] = ajv.compile(p.schema);
@@ -206,6 +225,7 @@ const _createParamsValidator = (parameters: any[], components) => {
 	};
 };
 
+//
 const _createRequestBodyValidator = (requestBody, components) => {
 	let schema = requestBody?.content?.['application/json']?.schema;
 	let validate: any = () => true;
@@ -242,6 +262,7 @@ const _toOpenApiLike = (route) =>
 		})
 		.join('/');
 
+//
 const _validateErrorsToString = (errors) =>
 	(errors || [])
 		.reduce((memo, e) => {

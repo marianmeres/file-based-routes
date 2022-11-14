@@ -47,7 +47,7 @@ suite.test('adding routes works', async () => {
 	};
 
 	// now add
-	apply(router);
+	await apply(router);
 
 	// clog(routes, mdlwrs);
 	// clog(JSON.stringify(schemaComponents, null, 2));

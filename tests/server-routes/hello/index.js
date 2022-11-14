@@ -47,7 +47,9 @@ export default {
 	// 	res.end('hello');
 	// },
 	get: {
-		handler: (req, res) => res.end('hello'),
+		// handler: (req, res) => res.end('hello'),
+		// factory example
+		createHandler: (app) => (req, res) => res.end('hello'),
 		schemaPaths: {
 			...responses($ref('Any')),
 		},

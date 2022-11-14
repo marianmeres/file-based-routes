@@ -73,19 +73,30 @@ validateRouteParams = false, validateRequestBody = false, } = {}) => {
         ['get', 'post', 'put', 'patch', 'del', 'delete', 'all', 'options'].forEach((method) => {
             const METHOD = method.toUpperCase();
             try {
+                // using factory instead of plain handler to allow more control
+                let createHandlerFn;
+                //
                 let middlewares;
-                let handlerFn;
                 // schemas
                 let paths;
                 let components;
                 // supported shapes are:
                 // { method: fn }
                 if (isFn(handler[method])) {
-                    handlerFn = handler[method];
+                    // normalize to factory
+                    createHandlerFn = () => handler[method];
                 }
                 // or { method: { middlewares: [...fns], handler: fn, schemas... } }
-                else if ((0, object_js_1.isObject)(handler[method]) && isFn(handler[method].handler)) {
-                    handlerFn = handler[method].handler;
+                // or { method: { middlewares: [...fns], createHandler: () => handler, schemas... } }
+                else if ((0, object_js_1.isObject)(handler[method])) {
+                    // factory has higher priority
+                    if (isFn(handler[method].createHandler)) {
+                        createHandlerFn = handler[method].createHandler;
+                    }
+                    else if (isFn(handler[method].handler)) {
+                        // normalize to factory
+                        createHandlerFn = () => handler[method].handler;
+                    }
                     middlewares = handler[method].middleware;
                     paths = handler[method].schemaPaths;
                     components = handler[method].schemaComponents;
@@ -95,11 +106,11 @@ validateRouteParams = false, validateRequestBody = false, } = {}) => {
                     middlewares = [middlewares];
                 middlewares = middlewares.filter(isFn);
                 // fail early on invalid route def...
-                if (handler[method] && !isFn(handlerFn)) {
+                if (handler[method] && !isFn(createHandlerFn)) {
                     throw new Error(`Invalid route definition/handler...`);
                 }
                 //
-                if (isFn(handlerFn)) {
+                if (isFn(createHandlerFn)) {
                     // to avoid ambiguity: /a/b.js vs /a/b/index.js
                     if (_seen[METHOD + route])
                         throw new Error(`Route already added!`);
@@ -126,7 +137,8 @@ validateRouteParams = false, validateRequestBody = false, } = {}) => {
                         schemaPaths = (0, merge_js_1.default)({}, schemaPaths, paths);
                     }
                     // collect all "method" functions into an array...
-                    methodFns.push((app) => {
+                    methodFns.push(async (app) => {
+                        const handlerFn = await createHandlerFn(app, route, method);
                         // note: NOT polka compatible...
                         app[method](route, middlewares, async (req, res, next) => {
                             try {
@@ -146,12 +158,17 @@ validateRouteParams = false, validateRequestBody = false, } = {}) => {
     }
     verbose && clog(`✔ ${dirLabel}`);
     return {
-        apply: (app) => methodFns.forEach((fn) => fn(app)),
+        apply: async (app) => {
+            for (const fn of methodFns)
+                await fn(app);
+        },
         schema: _buildSchema(schemaPaths, schemaComponents, schema),
     };
 };
 exports.fileBasedRoutes = fileBasedRoutes;
+//
 const _buildSchema = (paths, components, existing = {}) => (0, merge_js_1.default)({}, existing, { paths, components: { schemas: components } });
+//
 const _createParamsValidator = (parameters, components) => {
     const validator = (parameters || []).reduce((m, p) => {
         if (p.name && p.schema)
@@ -176,6 +193,7 @@ const _createParamsValidator = (parameters, components) => {
         }
     };
 };
+//
 const _createRequestBodyValidator = (requestBody, components) => {
     let schema = requestBody?.content?.['application/json']?.schema;
     let validate = () => true;
@@ -212,6 +230,7 @@ const _toOpenApiLike = (route) => route
     return segment;
 })
     .join('/');
+//
 const _validateErrorsToString = (errors) => (errors || [])
     .reduce((memo, e) => {
     memo.push(`${e.schemaPath} ${e.message}`);
