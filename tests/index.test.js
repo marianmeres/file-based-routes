@@ -75,4 +75,10 @@ suite.test('adding routes works', async () => {
 	assert(isObject(schema.components.schemas.Foo));
 });
 
+suite.test('non existing dir', async () => {
+	const { apply, schema } = await fileBasedRoutes('./foo', {}, { verbose: false });
+	assert(schema === null);
+	assert(typeof apply === 'function');
+});
+
 export default suite;

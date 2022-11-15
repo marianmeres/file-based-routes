@@ -27,6 +27,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.fileBasedRoutes = void 0;
+const node_fs_1 = __importDefault(require("node:fs"));
 const sync_1 = require("totalist/sync");
 const merge_js_1 = __importDefault(require("lodash/merge.js"));
 const clog_1 = require("@marianmeres/clog");
@@ -43,6 +44,10 @@ const fileBasedRoutes = async (routesDir,
 schema = {}, { verbose = false, prefix = '', 
 // custom validators outside of the openapi validation
 validateRouteParams = false, validateRequestBody = false, } = {}) => {
+    if (!node_fs_1.default.existsSync(routesDir)) {
+        verbose && clog.warn(`Dir ${routesDir} not found...`);
+        return { apply: () => null, schema: null };
+    }
     const dirLabel = routesDir.slice(process.cwd().length);
     // prettier-ignore
     verbose && clog(`--> ${dirLabel} ${prefix ? `(prefix '${prefix}')` : ''} ...`);

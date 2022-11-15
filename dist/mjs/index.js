@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import { totalist } from 'totalist/sync';
 import merge from 'lodash/merge.js';
 import { createClog } from '@marianmeres/clog';
@@ -14,6 +15,10 @@ export const fileBasedRoutes = async (routesDir,
 schema = {}, { verbose = false, prefix = '', 
 // custom validators outside of the openapi validation
 validateRouteParams = false, validateRequestBody = false, } = {}) => {
+    if (!fs.existsSync(routesDir)) {
+        verbose && clog.warn(`Dir ${routesDir} not found...`);
+        return { apply: () => null, schema: null };
+    }
     const dirLabel = routesDir.slice(process.cwd().length);
     // prettier-ignore
     verbose && clog(`--> ${dirLabel} ${prefix ? `(prefix '${prefix}')` : ''} ...`);
