@@ -62,7 +62,8 @@ suite.test('adding routes works', async () => {
 
 	// middlewares
 	assert(mdlwrs['/foo/a/:b/c'] === 2);
-	assert(Object.keys(mdlwrs).length === 1);
+	assert(mdlwrs['/foo/a/:b/c/:d'] === 1);
+	assert(Object.keys(mdlwrs).length === 2);
 
 	// clog(JSON.stringify(schema, null, 4));
 	assert(schema.openapi);

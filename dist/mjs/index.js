@@ -46,13 +46,15 @@ validateRouteParams = false, validateRequestBody = false, } = {}) => {
     const methodFns = [];
     for (let { route, abs } of files) {
         const handler = (await import(abs)).default || {};
+        // "global endpoint" middlewares
+        let moduleMiddlewares = handler.middlewares || [];
         ['get', 'post', 'put', 'patch', 'del', 'delete', 'all', 'options'].forEach((method) => {
             const METHOD = method.toUpperCase();
             try {
                 // using factory instead of plain handler to allow more control
                 let createHandlerFn;
                 //
-                let middlewares;
+                let middlewares = [...moduleMiddlewares];
                 // schemas
                 let paths;
                 let components;

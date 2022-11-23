@@ -90,6 +90,9 @@ export const fileBasedRoutes = async (
 	for (let { route, abs } of files) {
 		const handler = (await import(abs)).default || {};
 
+		// "global endpoint" middlewares
+		let moduleMiddlewares = handler.middlewares || [];
+
 		['get', 'post', 'put', 'patch', 'del', 'delete', 'all', 'options'].forEach(
 			(method) => {
 				const METHOD = method.toUpperCase();
@@ -101,7 +104,7 @@ export const fileBasedRoutes = async (
 						method: string
 					) => (req: Request, res: Response, next: NextFunction) => void;
 					//
-					let middlewares;
+					let middlewares = [...moduleMiddlewares];
 					// schemas
 					let paths;
 					let components;
