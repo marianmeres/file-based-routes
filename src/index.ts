@@ -100,7 +100,7 @@ export const fileBasedRoutes = async (
 				if (Array.isArray(pmdlwr)) {
 					pmdlwr = pmdlwr.filter(isFn);
 					if (pmdlwr.length) {
-						parentPathMiddlewares = parentPathMiddlewares.concat(pmdlwr)
+						parentPathMiddlewares = parentPathMiddlewares.concat(pmdlwr);
 					}
 				}
 			}

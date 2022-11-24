@@ -64,8 +64,8 @@ suite.test('adding routes works', async () => {
 	// clog(mdlwrs);
 	// {                 '/foo/a/:b/c': 2, '/foo/a/:b/c/:d': 1 }
 	// { '/foo/a/:b': 1, '/foo/a/:b/c': 2, '/foo/a/:b/c/:d': 3 }
-	assert(mdlwrs['/foo/a/:b'] === 1);      // 1 "parent"
-	assert(mdlwrs['/foo/a/:b/c'] === 2);    // 1 "parent" + 1 "self"
+	assert(mdlwrs['/foo/a/:b'] === 1); // 1 "parent"
+	assert(mdlwrs['/foo/a/:b/c'] === 2); // 1 "parent" + 1 "self"
 	assert(mdlwrs['/foo/a/:b/c/:d'] === 3); // 2 "parent" + 1 "self"
 	assert(Object.keys(mdlwrs).length === 3);
 

@@ -98,9 +98,7 @@
 						"type": "string"
 					}
 				},
-				"required": [
-					"foo"
-				]
+				"required": ["foo"]
 			},
 			"FooOut": {
 				"type": "object",
@@ -112,10 +110,7 @@
 						"type": "string"
 					}
 				},
-				"required": [
-					"id",
-					"foo"
-				]
+				"required": ["id", "foo"]
 			}
 		}
 	}

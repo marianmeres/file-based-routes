@@ -1,3 +1,1 @@
-export default [
-	() => ':b'
-];
+export default [() => ':b'];
