@@ -1,5 +1,5 @@
 export default {
-	middlewares: [() => null],
+	middleware: [() => null],
 	get() {
 		return 'a/b/c/d';
 	},

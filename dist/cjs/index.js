@@ -28,6 +28,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.fileBasedRoutes = void 0;
 const node_fs_1 = __importDefault(require("node:fs"));
+const node_path_1 = __importDefault(require("node:path"));
 const sync_1 = require("totalist/sync");
 const merge_js_1 = __importDefault(require("lodash/merge.js"));
 const clog_1 = require("@marianmeres/clog");
@@ -44,6 +45,7 @@ const fileBasedRoutes = async (routesDir,
 schema = {}, { verbose = false, prefix = '', 
 // custom validators outside of the openapi validation
 validateRouteParams = false, validateRequestBody = false, } = {}) => {
+    routesDir = node_path_1.default.normalize(routesDir);
     if (!node_fs_1.default.existsSync(routesDir)) {
         verbose && clog.warn(`Dir ${routesDir} not found...`);
         return { apply: () => null, schema: null };
@@ -74,16 +76,35 @@ validateRouteParams = false, validateRequestBody = false, } = {}) => {
     };
     const methodFns = [];
     for (let { route, abs } of files) {
+        //
+        let parentPathMiddlewares = [];
+        let parent = node_path_1.default.dirname(abs);
+        while (routesDir !== parent) {
+            let _mf = node_path_1.default.join(parent, '_middleware.js');
+            if (node_fs_1.default.existsSync(_mf)) {
+                let pmdlwr = (await Promise.resolve().then(() => __importStar(require(_mf)))).default;
+                if (Array.isArray(pmdlwr)) {
+                    pmdlwr = pmdlwr.filter(isFn);
+                    if (pmdlwr.length) {
+                        parentPathMiddlewares = parentPathMiddlewares.concat(pmdlwr);
+                    }
+                }
+            }
+            parent = node_path_1.default.dirname(parent);
+        }
+        // higher in tree must come first, so:
+        parentPathMiddlewares.reverse();
+        //
         const handler = (await Promise.resolve().then(() => __importStar(require(abs)))).default || {};
         // "global endpoint" middlewares
-        let moduleMiddlewares = handler.middlewares || [];
+        let moduleMiddlewares = handler.middleware || [];
         ['get', 'post', 'put', 'patch', 'del', 'delete', 'all', 'options'].forEach((method) => {
             const METHOD = method.toUpperCase();
             try {
                 // using factory instead of plain handler to allow more control
                 let createHandlerFn;
                 //
-                let middlewares = [...moduleMiddlewares];
+                let middlewares = [...parentPathMiddlewares, ...moduleMiddlewares];
                 // schemas
                 let paths;
                 let components;

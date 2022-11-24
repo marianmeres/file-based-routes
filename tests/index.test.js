@@ -49,7 +49,7 @@ suite.test('adding routes works', async () => {
 	// now add
 	await apply(router);
 
-	// clog(routes, mdlwrs);
+	// clog(routes);
 	// clog(JSON.stringify(schemaComponents, null, 2));
 
 	// routes
@@ -61,9 +61,13 @@ suite.test('adding routes works', async () => {
 	assert(Object.keys(routes).length === 5);
 
 	// middlewares
-	assert(mdlwrs['/foo/a/:b/c'] === 2);
-	assert(mdlwrs['/foo/a/:b/c/:d'] === 1);
-	assert(Object.keys(mdlwrs).length === 2);
+	// clog(mdlwrs);
+	// {                 '/foo/a/:b/c': 2, '/foo/a/:b/c/:d': 1 }
+	// { '/foo/a/:b': 1, '/foo/a/:b/c': 2, '/foo/a/:b/c/:d': 3 }
+	assert(mdlwrs['/foo/a/:b'] === 1);      // 1 "parent"
+	assert(mdlwrs['/foo/a/:b/c'] === 2);    // 1 "parent" + 1 "self"
+	assert(mdlwrs['/foo/a/:b/c/:d'] === 3); // 2 "parent" + 1 "self"
+	assert(Object.keys(mdlwrs).length === 3);
 
 	// clog(JSON.stringify(schema, null, 4));
 	assert(schema.openapi);

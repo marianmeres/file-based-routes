@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import { totalist } from 'totalist/sync';
 import merge from 'lodash/merge.js';
 import { createClog } from '@marianmeres/clog';
@@ -15,6 +16,7 @@ export const fileBasedRoutes = async (routesDir,
 schema = {}, { verbose = false, prefix = '', 
 // custom validators outside of the openapi validation
 validateRouteParams = false, validateRequestBody = false, } = {}) => {
+    routesDir = path.normalize(routesDir);
     if (!fs.existsSync(routesDir)) {
         verbose && clog.warn(`Dir ${routesDir} not found...`);
         return { apply: () => null, schema: null };
@@ -45,16 +47,35 @@ validateRouteParams = false, validateRequestBody = false, } = {}) => {
     };
     const methodFns = [];
     for (let { route, abs } of files) {
+        //
+        let parentPathMiddlewares = [];
+        let parent = path.dirname(abs);
+        while (routesDir !== parent) {
+            let _mf = path.join(parent, '_middleware.js');
+            if (fs.existsSync(_mf)) {
+                let pmdlwr = (await import(_mf)).default;
+                if (Array.isArray(pmdlwr)) {
+                    pmdlwr = pmdlwr.filter(isFn);
+                    if (pmdlwr.length) {
+                        parentPathMiddlewares = parentPathMiddlewares.concat(pmdlwr);
+                    }
+                }
+            }
+            parent = path.dirname(parent);
+        }
+        // higher in tree must come first, so:
+        parentPathMiddlewares.reverse();
+        //
         const handler = (await import(abs)).default || {};
         // "global endpoint" middlewares
-        let moduleMiddlewares = handler.middlewares || [];
+        let moduleMiddlewares = handler.middleware || [];
         ['get', 'post', 'put', 'patch', 'del', 'delete', 'all', 'options'].forEach((method) => {
             const METHOD = method.toUpperCase();
             try {
                 // using factory instead of plain handler to allow more control
                 let createHandlerFn;
                 //
-                let middlewares = [...moduleMiddlewares];
+                let middlewares = [...parentPathMiddlewares, ...moduleMiddlewares];
                 // schemas
                 let paths;
                 let components;
