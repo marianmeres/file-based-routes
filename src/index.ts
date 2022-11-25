@@ -124,7 +124,10 @@ export const fileBasedRoutes = async (
 		// "global endpoint" middlewares
 		let moduleMiddlewares = endpoint.middleware || [];
 
-		['get', 'post', 'put', 'patch', 'del', 'delete', 'all', 'options'].forEach(
+		const METHODS = ['get', 'post', 'put', 'patch', 'del', 'delete', 'all', 'options'];
+		const padEndLength = METHODS.reduce((m, v) => (m = Math.max(m, v.length)), 0);
+
+		METHODS.forEach(
 			(method) => {
 				const METHOD = method.toUpperCase();
 				try {
@@ -186,7 +189,7 @@ export const fileBasedRoutes = async (
 
 						// prettier-ignore
 						verbose && clog([
-							METHOD,
+							METHOD.padEnd(padEndLength, ' '),
 							route,
 							middlewares?.length ? `(with ${middlewares.length} middlewares)` : '',
 						].filter(Boolean).join(' '));

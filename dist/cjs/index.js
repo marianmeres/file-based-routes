@@ -102,7 +102,9 @@ validateRouteParams = false, validateRequestBody = false, errHandler = null, } =
         }
         // "global endpoint" middlewares
         let moduleMiddlewares = endpoint.middleware || [];
-        ['get', 'post', 'put', 'patch', 'del', 'delete', 'all', 'options'].forEach((method) => {
+        const METHODS = ['get', 'post', 'put', 'patch', 'del', 'delete', 'all', 'options'];
+        const padEndLength = METHODS.reduce((m, v) => (m = Math.max(m, v.length)), 0);
+        METHODS.forEach((method) => {
             const METHOD = method.toUpperCase();
             try {
                 // using factory instead of plain handler to allow more control
@@ -153,7 +155,7 @@ validateRouteParams = false, validateRequestBody = false, errHandler = null, } =
                     _seen[METHOD + route] = true;
                     // prettier-ignore
                     verbose && clog([
-                        METHOD,
+                        METHOD.padEnd(padEndLength, ' '),
                         route,
                         middlewares?.length ? `(with ${middlewares.length} middlewares)` : '',
                     ].filter(Boolean).join(' '));

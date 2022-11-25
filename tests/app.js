@@ -39,7 +39,7 @@ const fbr1 = await fileBasedRoutes(path.join(__dirname, './server-routes'), {
 	openapi: '3.0.0',
 	info: { title: 'Test server', version: pkg.version },
 	servers: [{ url: `http://${HOST}:${PORT}` }],
-});
+}, { verbose: true });
 
 const fbr2 = await fileBasedRoutes(
 	path.join(__dirname, './server-routes'),
