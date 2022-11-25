@@ -4,6 +4,7 @@ interface AddFileBasedRoutesOptions {
     prefix: string;
     validateRouteParams: boolean;
     validateRequestBody: boolean;
+    errHandler: (res: any, err: any) => void;
 }
 interface RouterLike {
     get: Function;
@@ -16,7 +17,7 @@ interface RouterLike {
     options: Function;
     use: Function;
 }
-export declare const fileBasedRoutes: (routesDir: string, schema?: object, { verbose, prefix, validateRouteParams, validateRequestBody, }?: Partial<AddFileBasedRoutesOptions>) => Promise<{
+export declare const fileBasedRoutes: (routesDir: string, schema?: object, { verbose, prefix, validateRouteParams, validateRequestBody, errHandler, }?: Partial<AddFileBasedRoutesOptions>) => Promise<{
     apply: (app: Partial<RouterLike> | Express | Application) => any;
     schema: any;
 }>;

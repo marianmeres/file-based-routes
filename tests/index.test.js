@@ -33,10 +33,11 @@ suite.test('adding routes works', async () => {
 
 	// dummy mock factory
 	const createHandler = (m) => (route, middlewares, handler) => {
-		routes[`${m}: ${route}`] = true;
+		const k = `${m}: ${route}`;
+		routes[k] = true;
 		middlewares.forEach((v) => {
-			mdlwrs[route] ||= 0;
-			mdlwrs[route]++;
+			mdlwrs[k] ||= 0;
+			mdlwrs[k]++;
 		});
 	};
 
@@ -49,10 +50,10 @@ suite.test('adding routes works', async () => {
 	// now add
 	await apply(router);
 
-	// clog(routes);
 	// clog(JSON.stringify(schemaComponents, null, 2));
 
 	// routes
+	// clog(routes);
 	assert(routes['get  : /foo/a']);
 	assert(routes['get  : /foo/a/:b']);
 	assert(routes['post : /foo/a/:b']);
@@ -62,12 +63,10 @@ suite.test('adding routes works', async () => {
 
 	// middlewares
 	// clog(mdlwrs);
-	// {                 '/foo/a/:b/c': 2, '/foo/a/:b/c/:d': 1 }
-	// { '/foo/a/:b': 1, '/foo/a/:b/c': 2, '/foo/a/:b/c/:d': 3 }
-	assert(mdlwrs['/foo/a/:b'] === 1); // 1 "parent"
-	assert(mdlwrs['/foo/a/:b/c'] === 2); // 1 "parent" + 1 "self"
-	assert(mdlwrs['/foo/a/:b/c/:d'] === 3); // 2 "parent" + 1 "self"
-	assert(Object.keys(mdlwrs).length === 3);
+	assert(mdlwrs['get  : /foo/a/:b'] === 1); // 1 "global"
+	assert(mdlwrs['post : /foo/a/:b'] === 1); // 1 "global"
+	assert(mdlwrs['get  : /foo/a/:b/c'] === 3); // 1 "global" + 1 "local"
+	assert(mdlwrs['get  : /foo/a/:b/c/:d'] === 4); // 2 "global" + 1 "module" + 1 "local"
 
 	// clog(JSON.stringify(schema, null, 4));
 	assert(schema.openapi);

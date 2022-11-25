@@ -1,6 +1,7 @@
 export default {
 	middleware: [() => null],
-	get() {
-		return 'a/b/c/d';
-	},
+	get: {
+		middleware: [() => null],
+		handler: () => 'a/b/c/d',
+	}
 };

@@ -19,6 +19,8 @@ interface AddFileBasedRoutesOptions {
 	// custom validators outside of the openapi schema
 	validateRouteParams: boolean;
 	validateRequestBody: boolean;
+	//
+	errHandler: (res, err) => void;
 }
 
 interface RouterLike {
@@ -47,6 +49,7 @@ export const fileBasedRoutes = async (
 		// custom validators outside of the openapi validation
 		validateRouteParams = false,
 		validateRequestBody = false,
+		errHandler = null,
 	}: Partial<AddFileBasedRoutesOptions> = {}
 ): Promise<{
 	apply: (app: Partial<RouterLike> | Express | Application) => any;
@@ -91,29 +94,35 @@ export const fileBasedRoutes = async (
 	const methodFns = [];
 	for (let { route, abs } of files) {
 		//
-		let parentPathMiddlewares = [];
+		let globalMiddlewares = [];
 		let parent = path.dirname(abs);
 		while (routesDir !== parent) {
 			let _mf = path.join(parent, '_middleware.js');
 			if (fs.existsSync(_mf)) {
 				let pmdlwr = (await import(_mf)).default;
-				if (Array.isArray(pmdlwr)) {
-					pmdlwr = pmdlwr.filter(isFn);
-					if (pmdlwr.length) {
-						parentPathMiddlewares = parentPathMiddlewares.concat(pmdlwr);
-					}
+				if (!pmdlwr || !Array.isArray(pmdlwr)) {
+					throw new Error(`Invalid middleware file (must default export array): ${_mf}`);
 				}
+				if (pmdlwr.length && !pmdlwr.every(isFn)) {
+					throw new Error(
+						`Invalid middleware file (must return array of middleware functions only): ${_mf}`
+					);
+				}
+				globalMiddlewares = globalMiddlewares.concat(pmdlwr);
 			}
 			parent = path.dirname(parent);
 		}
 		// higher in tree must come first, so:
-		parentPathMiddlewares.reverse();
+		globalMiddlewares.reverse();
 
 		//
-		const handler = (await import(abs)).default || {};
+		const endpoint = (await import(abs)).default;
+		if (!isObject(endpoint)) {
+			throw new Error(`Invalid route endpoint file (must default export object): ${abs}`);
+		}
 
 		// "global endpoint" middlewares
-		let moduleMiddlewares = handler.middleware || [];
+		let moduleMiddlewares = endpoint.middleware || [];
 
 		['get', 'post', 'put', 'patch', 'del', 'delete', 'all', 'options'].forEach(
 			(method) => {
@@ -125,39 +134,47 @@ export const fileBasedRoutes = async (
 						route: string,
 						method: string
 					) => (req: Request, res: Response, next: NextFunction) => void;
-					//
-					let middlewares = [...parentPathMiddlewares, ...moduleMiddlewares];
 					// schemas
 					let paths;
 					let components;
+					let localMiddlewares = [];
 
 					// supported shapes are:
 					// { method: fn }
-					if (isFn(handler[method])) {
+					if (isFn(endpoint[method])) {
 						// normalize to factory
-						createHandlerFn = () => handler[method];
+						createHandlerFn = () => endpoint[method];
 					}
 					// or { method: { middlewares: [...fns], handler: fn, schemas... } }
 					// or { method: { middlewares: [...fns], createHandler: () => handler, schemas... } }
-					else if (isObject(handler[method])) {
+					else if (isObject(endpoint[method])) {
 						// factory has higher priority
-						if (isFn(handler[method].createHandler)) {
-							createHandlerFn = handler[method].createHandler;
-						} else if (isFn(handler[method].handler)) {
+						if (isFn(endpoint[method].createHandler)) {
+							createHandlerFn = endpoint[method].createHandler;
+						} else if (isFn(endpoint[method].handler)) {
 							// normalize to factory
-							createHandlerFn = () => handler[method].handler;
+							createHandlerFn = () => endpoint[method].handler;
 						}
-						middlewares = handler[method].middleware;
-						paths = handler[method].schemaPaths;
-						components = handler[method].schemaComponents;
+						paths = endpoint[method].schemaPaths;
+						components = endpoint[method].schemaComponents;
+						localMiddlewares = endpoint[method].middleware || [];
 					}
 
-					// normalize + cleanup middlewares stack
-					if (!Array.isArray(middlewares)) middlewares = [middlewares];
-					middlewares = middlewares.filter(isFn);
+					if (localMiddlewares.length && !localMiddlewares.every(isFn)) {
+						throw new Error(
+							`Invalid ${METHOD} route endpoint (middleware key must return array of middleware functions): ${abs}`
+						);
+					}
+
+					//
+					let middlewares = [
+						...globalMiddlewares,
+						...moduleMiddlewares,
+						...localMiddlewares,
+					];
 
 					// fail early on invalid route def...
-					if (handler[method] && !isFn(createHandlerFn)) {
+					if (endpoint[method] && !isFn(createHandlerFn)) {
 						throw new Error(`Invalid route definition/handler...`);
 					}
 
@@ -171,7 +188,7 @@ export const fileBasedRoutes = async (
 						verbose && clog([
 							METHOD,
 							route,
-							middlewares.length ? `(with ${middlewares.length} middlewares)` : '',
+							middlewares?.length ? `(with ${middlewares.length} middlewares)` : '',
 						].filter(Boolean).join(' '));
 
 						// collect & deep merge schemas
@@ -205,7 +222,11 @@ export const fileBasedRoutes = async (
 									try {
 										await handlerFn(req, res, next);
 									} catch (err) {
-										next(err);
+										if (isFn(errHandler)) {
+											errHandler(res, err);
+										} else {
+											next(err);
+										}
 									}
 								}
 							);
