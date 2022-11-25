@@ -151,13 +151,8 @@ validateRouteParams = false, validateRequestBody = false, errHandler = null, } =
                             try {
                                 await handlerFn(req, res, next);
                             }
-                            catch (err) {
-                                if (isFn(errHandler)) {
-                                    errHandler(res, err);
-                                }
-                                else {
-                                    next(err);
-                                }
+                            catch (e) {
+                                return isFn(errHandler) ? errHandler(res, e) : next(e);
                             }
                         });
                     });
