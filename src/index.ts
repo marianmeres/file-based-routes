@@ -221,12 +221,8 @@ export const fileBasedRoutes = async (
 								async (req: Request, res: Response, next: NextFunction) => {
 									try {
 										await handlerFn(req, res, next);
-									} catch (err) {
-										if (isFn(errHandler)) {
-											errHandler(res, err);
-										} else {
-											next(err);
-										}
+									} catch (e) {
+										return isFn(errHandler) ? errHandler(res, e) : next(e);
 									}
 								}
 							);
