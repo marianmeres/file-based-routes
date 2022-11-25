@@ -3,5 +3,5 @@ export default {
 	get: {
 		middleware: [() => null],
 		handler: () => 'a/b/c/d',
-	}
+	},
 };
