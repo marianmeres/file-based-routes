@@ -4,7 +4,7 @@ interface AddFileBasedRoutesOptions {
     prefix: string;
     validateRouteParams: boolean;
     validateRequestBody: boolean;
-    errHandler: (res: any, err: any) => void;
+    errHandler: (res: any, err: any, req: any) => void;
 }
 interface RouterLike {
     get: Function;

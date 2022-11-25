@@ -19,8 +19,8 @@ interface AddFileBasedRoutesOptions {
 	// custom validators outside of the openapi schema
 	validateRouteParams: boolean;
 	validateRequestBody: boolean;
-	//
-	errHandler: (res, err) => void;
+	// note "unconventional" signature
+	errHandler: (res, err, req) => void;
 }
 
 interface RouterLike {
@@ -225,7 +225,7 @@ export const fileBasedRoutes = async (
 									try {
 										await handlerFn(req, res, next);
 									} catch (e) {
-										return isFn(errHandler) ? errHandler(res, e) : next(e);
+										return isFn(errHandler) ? errHandler(res, e, req) : next(e);
 									}
 								}
 							);

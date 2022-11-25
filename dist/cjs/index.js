@@ -183,7 +183,7 @@ validateRouteParams = false, validateRequestBody = false, errHandler = null, } =
                                 await handlerFn(req, res, next);
                             }
                             catch (e) {
-                                return isFn(errHandler) ? errHandler(res, e) : next(e);
+                                return isFn(errHandler) ? errHandler(res, e, req) : next(e);
                             }
                         });
                     });
