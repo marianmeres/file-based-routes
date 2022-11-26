@@ -35,11 +35,15 @@ const clog2 = createClog('app2');
 const app = express();
 const app2 = express();
 
-const fbr1 = await fileBasedRoutes(path.join(__dirname, './server-routes'), {
-	openapi: '3.0.0',
-	info: { title: 'Test server', version: pkg.version },
-	servers: [{ url: `http://${HOST}:${PORT}` }],
-}, { verbose: true });
+const fbr1 = await fileBasedRoutes(
+	path.join(__dirname, './server-routes'),
+	{
+		openapi: '3.0.0',
+		info: { title: 'Test server', version: pkg.version },
+		servers: [{ url: `http://${HOST}:${PORT}` }],
+	},
+	{ verbose: true }
+);
 
 const fbr2 = await fileBasedRoutes(
 	path.join(__dirname, './server-routes'),
