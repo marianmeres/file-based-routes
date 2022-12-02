@@ -105,7 +105,7 @@ validateRouteParams = false, validateRequestBody = false, errHandler = null, } =
                     components = endpoint[method].schemaComponents;
                     localMiddlewares = endpoint[method].middleware || [];
                 }
-                if (localMiddlewares.length && !localMiddlewares.every(isFn)) {
+                if (Array.isArray(localMiddlewares) && !localMiddlewares.every(isFn)) {
                     throw new Error(`Invalid ${METHOD} route endpoint (middleware key must return array of middleware functions): ${abs}`);
                 }
                 //
