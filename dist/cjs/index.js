@@ -45,6 +45,7 @@ const fileBasedRoutes = async (routesDir,
 schema = {}, { verbose = false, prefix = '', 
 // custom validators outside of the openapi validation
 validateRouteParams = false, validateRequestBody = false, errHandler = null, } = {}) => {
+    var _a, _b;
     routesDir = node_path_1.default.normalize(routesDir);
     if (!node_fs_1.default.existsSync(routesDir)) {
         verbose && clog.warn(`Dir ${routesDir} not found...`);
@@ -82,7 +83,7 @@ validateRouteParams = false, validateRequestBody = false, errHandler = null, } =
         while (routesDir !== parent) {
             let _mf = node_path_1.default.join(parent, '_middleware.js');
             if (node_fs_1.default.existsSync(_mf)) {
-                let pmdlwr = (await Promise.resolve().then(() => __importStar(require(_mf)))).default;
+                let pmdlwr = (await (_a = _mf, Promise.resolve().then(() => __importStar(require(_a))))).default;
                 if (!pmdlwr || !Array.isArray(pmdlwr)) {
                     throw new Error(`Invalid middleware file (must default export array): ${_mf}`);
                 }
@@ -96,7 +97,7 @@ validateRouteParams = false, validateRequestBody = false, errHandler = null, } =
         // higher in tree must come first, so:
         globalMiddlewares.reverse();
         //
-        const endpoint = (await Promise.resolve().then(() => __importStar(require(abs)))).default;
+        const endpoint = (await (_b = abs, Promise.resolve().then(() => __importStar(require(_b))))).default;
         if (!(0, object_js_1.isObject)(endpoint)) {
             throw new Error(`Invalid route endpoint file (must default export object): ${abs}`);
         }
