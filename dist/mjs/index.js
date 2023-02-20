@@ -14,7 +14,7 @@ const ajv = new Ajv({ strict: false, validateFormats: false });
 export const fileBasedRoutes = async (routesDir, 
 // openapi schema into which the paths description will be deep merged (if available)
 schema = {}, { verbose = false, prefix = '', 
-// custom validators outside of the openapi validation
+// custom validators outside of the openapi validation (if any)
 validateRouteParams = false, validateRequestBody = false, errHandler = null, } = {}) => {
     routesDir = path.normalize(routesDir);
     if (!fs.existsSync(routesDir)) {

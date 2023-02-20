@@ -43,7 +43,7 @@ const ajv = new ajv_1.default({ strict: false, validateFormats: false });
 const fileBasedRoutes = async (routesDir, 
 // openapi schema into which the paths description will be deep merged (if available)
 schema = {}, { verbose = false, prefix = '', 
-// custom validators outside of the openapi validation
+// custom validators outside of the openapi validation (if any)
 validateRouteParams = false, validateRequestBody = false, errHandler = null, } = {}) => {
     var _a, _b;
     routesDir = node_path_1.default.normalize(routesDir);

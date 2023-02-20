@@ -46,7 +46,7 @@ export const fileBasedRoutes = async (
 	{
 		verbose = false,
 		prefix = '',
-		// custom validators outside of the openapi validation
+		// custom validators outside of the openapi validation (if any)
 		validateRouteParams = false,
 		validateRequestBody = false,
 		errHandler = null,
