@@ -1,4 +1,4 @@
-import { yamlize } from '../../../../dist/mjs/lib/yamlize.js';
+import { yamlize } from '../../../../dist/lib/yamlize.js';
 
 export default {
 	get() {

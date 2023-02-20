@@ -3,7 +3,7 @@ import {
 	parameters,
 	requestBody,
 	responses,
-} from '../../../dist/mjs/lib/schema.js';
+} from '../../../dist/lib/schema.js';
 import { createClog } from '@marianmeres/clog';
 
 const clog = createClog('/hello');

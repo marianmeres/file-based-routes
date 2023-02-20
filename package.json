@@ -3,11 +3,9 @@
   "version": "0.0.6",
   "description": "Mirror filesystem to express app (or similar) endpoints.",
   "type": "module",
-  "module": "./dist/cjs/index.js",
-  "main": "./dist/mjs/index.js",
+  "main": "./dist/index.js",
   "exports": {
-    "require": "./dist/cjs/index.cjs",
-    "import": "./dist/mjs/index.js"
+    "import": "./dist/index.js"
   },
   "files": [
     "dist"
@@ -15,7 +13,8 @@
   "scripts": {
     "clean": "rimraf dist/*",
     "prettier": "prettier --write \"{src,tests}/**/*.{js,ts,json}\"",
-    "build": "npm run clean && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
+    "xxx-build": "npm run clean && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
+    "build": "npm run clean && tsc -p tsconfig.json",
     "dev": "npm run clean && tsc -w",
     "test": "test-runner",
     "release": "release",

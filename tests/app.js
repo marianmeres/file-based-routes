@@ -2,7 +2,7 @@ import express from 'express';
 import fs from 'node:fs';
 import compression from 'compression';
 import bodyParser from 'body-parser';
-import { fileBasedRoutes } from '../dist/mjs/index.js';
+import { fileBasedRoutes } from '../dist/index.js';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClog } from '@marianmeres/clog';

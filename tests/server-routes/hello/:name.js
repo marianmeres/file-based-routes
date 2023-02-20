@@ -1,5 +1,4 @@
-import { yamlize } from '../../../dist/mjs/lib/yamlize.js';
-import { parameters, responses } from '../../../dist/mjs/lib/schema.js';
+import { parameters, responses } from '../../../dist/lib/schema.js';
 
 export default {
 	get: {

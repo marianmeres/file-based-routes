@@ -4,7 +4,7 @@ import { strict as assert } from 'node:assert';
 import { TestRunner } from '@marianmeres/test-runner';
 import { fileURLToPath } from 'node:url';
 import { createClog } from '@marianmeres/clog';
-import { fileBasedRoutes } from '../dist/mjs/index.js';
+import { fileBasedRoutes } from '../dist/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
