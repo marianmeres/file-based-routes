@@ -4,7 +4,11 @@
   "description": "Mirror filesystem to express app (or similar) endpoints.",
   "type": "module",
   "module": "./dist/cjs/index.js",
-  "main": "dist/mjs/index.js",
+  "main": "./dist/mjs/index.js",
+  "exports": {
+    "require": "./dist/cjs/index.cjs",
+    "import": "./dist/mjs/index.js"
+  },
   "files": [
     "dist"
   ],
@@ -49,7 +53,7 @@
     "undici": "^5.12.0"
   },
   "dependencies": {
-    "@marianmeres/clog": "^0.3.2",
+    "@marianmeres/clog": "^0.5.0",
     "@polka/send-type": "^0.5.2",
     "ajv": "^8.11.0",
     "express-openapi-validator": "^4.13.8",
