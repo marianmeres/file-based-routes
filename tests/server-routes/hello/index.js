@@ -1,9 +1,4 @@
-import {
-	$ref,
-	parameters,
-	requestBody,
-	responses,
-} from '../../../dist/lib/schema.js';
+import { $ref, parameters, requestBody, responses } from '../../../dist/lib/schema.js';
 import { createClog } from '@marianmeres/clog';
 
 const clog = createClog('/hello');

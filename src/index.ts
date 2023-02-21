@@ -91,6 +91,29 @@ export const fileBasedRoutes = async (
 		Any: { type: 'object' },
 	};
 
+	const _maybeImportMdlwr = async (file) => {
+		let out = [];
+		if (fs.existsSync(file)) {
+			out = (await import(file)).default;
+			if (!out || !Array.isArray(out)) {
+				throw new Error(
+					`Invalid top most middleware file (must default export array): ${file}`
+				);
+			}
+			if (out.length && !out.every(isFn)) {
+				throw new Error(
+					`Invalid middleware file (must return array of middleware functions only): ${file}`
+				);
+			}
+		}
+		return out;
+	};
+
+	// special case topmost middleware
+	let topMostMiddlewares = await _maybeImportMdlwr(
+		path.join(routesDir, '_middleware.js')
+	);
+
 	const methodFns = [];
 	for (let { route, abs } of files) {
 		//
@@ -98,18 +121,7 @@ export const fileBasedRoutes = async (
 		let parent = path.dirname(abs);
 		while (routesDir !== parent) {
 			let _mf = path.join(parent, '_middleware.js');
-			if (fs.existsSync(_mf)) {
-				let pmdlwr = (await import(_mf)).default;
-				if (!pmdlwr || !Array.isArray(pmdlwr)) {
-					throw new Error(`Invalid middleware file (must default export array): ${_mf}`);
-				}
-				if (pmdlwr.length && !pmdlwr.every(isFn)) {
-					throw new Error(
-						`Invalid middleware file (must return array of middleware functions only): ${_mf}`
-					);
-				}
-				globalMiddlewares = globalMiddlewares.concat(pmdlwr);
-			}
+			globalMiddlewares = globalMiddlewares.concat(await _maybeImportMdlwr(_mf));
 			parent = path.dirname(parent);
 		}
 		// higher in tree must come first, so:
@@ -170,6 +182,7 @@ export const fileBasedRoutes = async (
 
 				//
 				let middlewares = [
+					...topMostMiddlewares,
 					...globalMiddlewares,
 					...moduleMiddlewares,
 					...localMiddlewares,
