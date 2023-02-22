@@ -4,17 +4,18 @@ import { TestRunner } from '@marianmeres/test-runner';
 import { fileURLToPath } from 'node:url';
 import { createClog } from '@marianmeres/clog';
 import { fetch } from 'undici';
-import { STATUS_CODES } from 'http';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const __basename = path.basename(__filename);
 
-const PORT = 9999;
-const PORT2 = 9998;
+const PORT = 9998;
+const PORT2 = 9999;
+const PORT3 = 10000;
 const HOST = '0.0.0.0';
 const url = (path = '/') => `http://${HOST}:${PORT}${path}`;
 const url2 = (path = '/') => `http://${HOST}:${PORT2}${path}`;
+const url3 = (path = '/') => `http://${HOST}:${PORT3}${path}`;
 
 const post = async (url, body) =>
 	fetch(url, {
@@ -95,6 +96,11 @@ suite.test('request body validation works 2', async () => {
 	data = await r.json();
 	// clog(data);
 	assert(data.errors.length);
+});
+
+suite.test('request body validation works 3 (validateRequestBody flag per route)', async () => {
+	let r = await post(url3(`/hey`));
+	assert(r.status === 400, `Expecing to fail with 400, but got ${r.status}`);
 });
 
 export default suite;

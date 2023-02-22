@@ -16,7 +16,7 @@
     "test": "test-runner",
     "release": "release",
     "test:watch": "nodemon -q -w dist -w tests -x test-runner --",
-    "test-server": "node tests/app.js"
+    "test-server": "nodemon -q -w tests/server-routes -w tests/app.js tests/app.js"
   },
   "repository": {
     "type": "git",

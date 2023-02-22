@@ -1,5 +1,5 @@
 import merge from 'lodash/merge.js';
-// all opinionated, "type json" based
+// set of quick-n-dirty pragmatic helpers, all opinionated, "type json" based
 export const $ref = (ref) => ({ $ref: `#/components/schemas/${ref}` });
 export const parameters = (params, other = {}) => merge({}, other, {
     parameters: (params || []).reduce((m, p) => {

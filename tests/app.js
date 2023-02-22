@@ -23,17 +23,21 @@ createClog.CONFIG.WRITER = {
 	error: _setup('error', red),
 };
 
-const PORT = 9999;
-const PORT2 = 9998;
+const PORT = 9998;
+const PORT2 = 9999;
+const PORT3 = 10000;
 const HOST = '0.0.0.0';
 const url = (path = '/') => `http://${HOST}:${PORT}${path}`;
 
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
 const clog = createClog('app');
 const clog2 = createClog('app2');
+const clog3 = createClog('app3');
 
 const app = express();
 const app2 = express();
+// ako 1, ale bez openapi validacie
+const app3 = express();
 
 const fbr1 = await fileBasedRoutes(
 	path.join(__dirname, './server-routes'),
@@ -49,6 +53,10 @@ const fbr2 = await fileBasedRoutes(
 	path.join(__dirname, './server-routes'),
 	{},
 	{ validateRouteParams: true, validateRequestBody: true }
+);
+
+const fbr3 = await fileBasedRoutes(
+	path.join(__dirname, './server-routes3')
 );
 
 const common = (app, logger) =>
@@ -108,4 +116,17 @@ app2.listen(PORT2, HOST, async () => {
 		});
 	});
 	clog2.info(`http://${HOST}:${PORT2} ...`);
+});
+
+// no
+app3.listen(PORT3, HOST, async () => {
+	common(app3, clog3);
+	await fbr3.apply(app3);
+	app3.use((err, req, res, next) => {
+		res.status(err.status || err.code || 500).json({
+			message: err.message,
+			errors: err.errors,
+		});
+	});
+	clog3.info(`http://${HOST}:${PORT3} ...`);
 });
