@@ -10,8 +10,28 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const __basename = path.basename(__filename);
 
-const suite = new TestRunner(__basename);
 const clog = createClog(__basename);
+
+//
+let routes = {};
+let mdlwrs = {};
+
+// dummy mock factory
+const createHandler = (m) => (route, middlewares, handler) => {
+	const k = `${m}: ${route}`;
+	routes[k] = true;
+	middlewares.forEach((v) => {
+		mdlwrs[k] ||= 0;
+		mdlwrs[k]++;
+	});
+};
+
+const suite = new TestRunner(__basename, {
+	beforeEach: () => {
+		routes = {};
+		mdlwrs = {};
+	},
+});
 
 suite.test('adding routes works', async () => {
 	const { apply, schema } = await fileBasedRoutes(
@@ -26,20 +46,6 @@ suite.test('adding routes works', async () => {
 			prefix: '/foo',
 		}
 	);
-
-	//
-	const routes = {};
-	const mdlwrs = {};
-
-	// dummy mock factory
-	const createHandler = (m) => (route, middlewares, handler) => {
-		const k = `${m}: ${route}`;
-		routes[k] = true;
-		middlewares.forEach((v) => {
-			mdlwrs[k] ||= 0;
-			mdlwrs[k]++;
-		});
-	};
 
 	// mock
 	const router = {
@@ -83,6 +89,42 @@ suite.test('non existing dir', async () => {
 	const { apply, schema } = await fileBasedRoutes('./foo', {}, { verbose: false });
 	assert(schema === null);
 	assert(typeof apply === 'function');
+});
+
+suite.test('top most middleware with sibling route', async () => {
+	const { apply, schema } = await fileBasedRoutes(
+		path.join(__dirname, './fixtures-2/topmost-with-sibling')
+	);
+
+	//
+	const router = { get: createHandler('get') };
+	await apply(router);
+	// clog(routes, mdlwrs);
+
+	//
+	assert(routes['get: /a']);
+	assert(Object.keys(routes).length === 1);
+
+	//
+	assert(mdlwrs['get: /a'] === 1); // 1 "topmost"
+});
+
+suite.test('top most middleware without sibling route', async () => {
+	const { apply, schema } = await fileBasedRoutes(
+		path.join(__dirname, './fixtures-2/topmost-without-sibling')
+	);
+
+	//
+	const router = { get: createHandler('get') };
+	await apply(router);
+	// clog(routes, mdlwrs);
+
+	//
+	assert(routes['get: /a']);
+	assert(Object.keys(routes).length === 1);
+
+	//
+	assert(mdlwrs['get: /a'] === 2); // 1 "topmost"
 });
 
 export default suite;

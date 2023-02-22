@@ -109,23 +109,24 @@ export const fileBasedRoutes = async (
 		return out;
 	};
 
-	// special case topmost middleware
-	let topMostMiddlewares = await _maybeImportMdlwr(
+	// special case topmost middlewares
+	// "topmost" -> in the routes dir
+	let topmostMiddlewares = await _maybeImportMdlwr(
 		path.join(routesDir, '_middleware.js')
 	);
 
 	const methodFns = [];
 	for (let { route, abs } of files) {
-		//
-		let globalMiddlewares = [];
+		// "global" -> somewhere in the ancestor dir segment
+		let ancestorMiddlewares = [];
 		let parent = path.dirname(abs);
 		while (routesDir !== parent) {
 			let _mf = path.join(parent, '_middleware.js');
-			globalMiddlewares = globalMiddlewares.concat(await _maybeImportMdlwr(_mf));
+			ancestorMiddlewares = ancestorMiddlewares.concat(await _maybeImportMdlwr(_mf));
 			parent = path.dirname(parent);
 		}
 		// higher in tree must come first, so:
-		globalMiddlewares.reverse();
+		ancestorMiddlewares.reverse();
 
 		//
 		const endpoint = (await import(abs)).default;
@@ -133,7 +134,7 @@ export const fileBasedRoutes = async (
 			throw new Error(`Invalid route endpoint file (must default export object): ${abs}`);
 		}
 
-		// "global endpoint" middlewares
+		// "module endpoint" middlewares -> in the endpoint's dir
 		let moduleMiddlewares = endpoint.middleware || [];
 
 		const METHODS = ['get', 'post', 'put', 'patch', 'del', 'delete', 'all', 'options'];
@@ -182,8 +183,8 @@ export const fileBasedRoutes = async (
 
 				//
 				let middlewares = [
-					...topMostMiddlewares,
-					...globalMiddlewares,
+					...topmostMiddlewares,
+					...ancestorMiddlewares,
 					...moduleMiddlewares,
 					...localMiddlewares,
 				];
