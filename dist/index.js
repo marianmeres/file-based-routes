@@ -146,10 +146,12 @@ validateRouteParams = false, validateRequestBody = false, errHandler = null, } =
                     if (paths) {
                         paths = isFn(paths) ? paths() : paths;
                         paths = merge({ summary: method.toUpperCase(), responses: {} }, paths);
-                        validateRouteParams &&
+                        if (validateRouteParams || endpoint[method].validateRouteParams) {
                             middlewares.push(_createParamsValidator(paths?.parameters, schemaComponents));
-                        validateRequestBody &&
+                        }
+                        if (validateRequestBody || endpoint[method].validateRequestBody) {
                             middlewares.push(_createRequestBodyValidator(paths?.requestBody, schemaComponents));
+                        }
                         paths = { [_toOpenApiLike(route)]: { [method]: paths } };
                         schemaPaths = merge({}, schemaPaths, paths);
                     }
