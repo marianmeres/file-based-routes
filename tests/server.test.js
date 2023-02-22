@@ -98,9 +98,12 @@ suite.test('request body validation works 2', async () => {
 	assert(data.errors.length);
 });
 
-suite.test('request body validation works 3 (validateRequestBody flag per route)', async () => {
-	let r = await post(url3(`/hey`));
-	assert(r.status === 400, `Expecing to fail with 400, but got ${r.status}`);
-});
+suite.test(
+	'request body validation works 3 (validateRequestBody flag per route)',
+	async () => {
+		let r = await post(url3(`/hey`));
+		assert(r.status === 400, `Expecing to fail with 400, but got ${r.status}`);
+	}
+);
 
 export default suite;

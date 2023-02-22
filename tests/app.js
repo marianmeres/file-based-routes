@@ -55,9 +55,7 @@ const fbr2 = await fileBasedRoutes(
 	{ validateRouteParams: true, validateRequestBody: true }
 );
 
-const fbr3 = await fileBasedRoutes(
-	path.join(__dirname, './server-routes3')
-);
+const fbr3 = await fileBasedRoutes(path.join(__dirname, './server-routes3'));
 
 const common = (app, logger) =>
 	app.use(

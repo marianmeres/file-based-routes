@@ -147,10 +147,10 @@ validateRouteParams = false, validateRequestBody = false, errHandler = null, } =
                         paths = isFn(paths) ? paths() : paths;
                         paths = merge({ summary: method.toUpperCase(), responses: {} }, paths);
                         if (validateRouteParams || endpoint[method].validateRouteParams) {
-                            middlewares.push(_createParamsValidator(paths?.parameters, schemaComponents));
+                            middlewares.push(_createParamsValidator(paths?.parameters, schemaComponents, errHandler));
                         }
                         if (validateRequestBody || endpoint[method].validateRequestBody) {
-                            middlewares.push(_createRequestBodyValidator(paths?.requestBody, schemaComponents));
+                            middlewares.push(_createRequestBodyValidator(paths?.requestBody, schemaComponents, errHandler));
                         }
                         paths = { [_toOpenApiLike(route)]: { [method]: paths } };
                         schemaPaths = merge({}, schemaPaths, paths);
@@ -187,7 +187,7 @@ validateRouteParams = false, validateRequestBody = false, errHandler = null, } =
 //
 const _buildSchema = (paths, components, existing = {}) => merge({}, existing, { paths, components: { schemas: components } });
 //
-const _createParamsValidator = (parameters, components) => {
+const _createParamsValidator = (parameters, components, errHandler = null) => {
     const validator = (parameters || []).reduce((m, p) => {
         if (p.name && p.schema)
             m[p.name] = ajv.compile(p.schema);
@@ -207,12 +207,12 @@ const _createParamsValidator = (parameters, components) => {
             next();
         }
         catch (e) {
-            next(e);
+            return isFn(errHandler) ? errHandler(res, e, req) : next(e);
         }
     };
 };
 //
-const _createRequestBodyValidator = (requestBody, components) => {
+const _createRequestBodyValidator = (requestBody, components, errHandler = null) => {
     let schema = requestBody?.content?.['application/json']?.schema;
     let validate = () => true;
     if (schema) {
@@ -235,7 +235,7 @@ const _createRequestBodyValidator = (requestBody, components) => {
             next();
         }
         catch (e) {
-            next(e);
+            return isFn(errHandler) ? errHandler(res, e, req) : next(e);
         }
     };
 };
