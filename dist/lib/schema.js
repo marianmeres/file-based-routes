@@ -6,16 +6,14 @@ export const parameters = (params, other = {}) => merge({}, other, {
         if (typeof p === 'string')
             p = { name: p };
         if (p.name) {
+            const _in = p.in || 'path';
+            const required = p.required !== undefined ? p.required : true;
+            const schema = p.schema || { type: 'string' };
             m.push({
-                ...{ in: 'path' },
-                ...(p.in || {}),
+                in: _in,
                 name: p.name,
-                ...{ required: true },
-                ...(p.required || {}),
-                schema: {
-                    ...{ type: 'string' },
-                    ...(p.schema || {}),
-                },
+                required,
+                schema,
             });
         }
         return m;

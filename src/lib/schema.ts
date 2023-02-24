@@ -9,16 +9,14 @@ export const parameters = (params: any[], other = {}) =>
 		parameters: (params || []).reduce((m, p) => {
 			if (typeof p === 'string') p = { name: p };
 			if (p.name) {
+				const _in = p.in || 'path';
+				const required = p.required !== undefined ? p.required : true;
+				const schema = p.schema || { type: 'string' };
 				m.push({
-					...{ in: 'path' }, // overridable by p.in
-					...(p.in || {}),
+					in: _in,
 					name: p.name,
-					...{ required: true }, // overridable by p.required
-					...(p.required || {}),
-					schema: {
-						...{ type: 'string' }, // overridable by p.schema
-						...(p.schema || {}),
-					},
+					required,
+					schema,
 				});
 			}
 			return m;
