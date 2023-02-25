@@ -273,10 +273,12 @@ const _buildSchema = (paths, components, existing = {}) =>
 //
 const _createParamsValidator = (parameters: any[], components, errHandler = null) => {
 	const type = {};
+	const required = {};
 	const validator = (parameters || []).reduce((m, p) => {
 		if (p.name && p.schema) {
 			m[p.name] = ajv.compile(p.schema);
 			type[p.name] = p.in === 'query' ? 'query' : 'params';
+			if (p.required) required[p.name] = true;
 		}
 		return m;
 	}, {});
@@ -284,9 +286,15 @@ const _createParamsValidator = (parameters: any[], components, errHandler = null
 		try {
 			Object.entries(validator).forEach((entry: any) => {
 				const [name, validate] = entry;
-				// if (!(validate as any)(req.params[name])) {
+				// if not marked as required AND not present in req skip... (in other words,
+				// I can't get the validate to consider the param type as not required)
+				if (!required[name] && req[type[name]][name] === undefined) {
+					return;
+				}
 				if (!(validate as any)(req[type[name]][name])) {
-					const e: any = new ValidationError(`Param '${name}' (in ${type[name]}) is not valid`);
+					const e: any = new ValidationError(
+						`Param '${name}' (in ${type[name]}) is not valid`
+					);
 					e.errors = validate.errors;
 					e.status = 400; // bad request
 					throw e;
