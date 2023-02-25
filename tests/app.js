@@ -52,7 +52,7 @@ const fbr1 = await fileBasedRoutes(
 const fbr2 = await fileBasedRoutes(
 	path.join(__dirname, './server-routes'),
 	{},
-	{ validateRouteParams: true, validateRequestBody: true }
+	{ validateParams: true, validateRequestBody: true }
 );
 
 const fbr3 = await fileBasedRoutes(path.join(__dirname, './server-routes3'));

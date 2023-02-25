@@ -17,7 +17,7 @@ interface AddFileBasedRoutesOptions {
 	verbose: boolean;
 	prefix: string;
 	// custom validators outside of the openapi schema
-	validateRouteParams: boolean;
+	validateParams: boolean;
 	validateRequestBody: boolean;
 	// note "unconventional" signature
 	errHandler: (res, err, req) => void;
@@ -47,7 +47,7 @@ export const fileBasedRoutes = async (
 		verbose = false,
 		prefix = '',
 		// custom validators outside of the openapi validation (if any)
-		validateRouteParams = false,
+		validateParams = false,
 		validateRequestBody = false,
 		errHandler = null,
 	}: Partial<AddFileBasedRoutesOptions> = {}
@@ -215,7 +215,7 @@ export const fileBasedRoutes = async (
 					if (paths) {
 						paths = isFn(paths) ? paths() : paths;
 						paths = merge({ summary: method.toUpperCase(), responses: {} }, paths);
-						if (validateRouteParams || endpoint[method].validateRouteParams) {
+						if (validateParams || endpoint[method].validateParams) {
 							middlewares.push(
 								_createParamsValidator(paths?.parameters, schemaComponents, errHandler)
 							);

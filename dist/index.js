@@ -15,7 +15,7 @@ export const fileBasedRoutes = async (routesDir,
 // openapi schema into which the paths description will be deep merged (if available)
 schema = {}, { verbose = false, prefix = '', 
 // custom validators outside of the openapi validation (if any)
-validateRouteParams = false, validateRequestBody = false, errHandler = null, } = {}) => {
+validateParams = false, validateRequestBody = false, errHandler = null, } = {}) => {
     routesDir = path.normalize(routesDir);
     if (!fs.existsSync(routesDir)) {
         verbose && clog.warn(`Dir ${routesDir} not found...`);
@@ -146,7 +146,7 @@ validateRouteParams = false, validateRequestBody = false, errHandler = null, } =
                     if (paths) {
                         paths = isFn(paths) ? paths() : paths;
                         paths = merge({ summary: method.toUpperCase(), responses: {} }, paths);
-                        if (validateRouteParams || endpoint[method].validateRouteParams) {
+                        if (validateParams || endpoint[method].validateParams) {
                             middlewares.push(_createParamsValidator(paths?.parameters, schemaComponents, errHandler));
                         }
                         if (validateRequestBody || endpoint[method].validateRequestBody) {

@@ -2,7 +2,7 @@ import { Express, Application } from 'express';
 interface AddFileBasedRoutesOptions {
     verbose: boolean;
     prefix: string;
-    validateRouteParams: boolean;
+    validateParams: boolean;
     validateRequestBody: boolean;
     errHandler: (res: any, err: any, req: any) => void;
 }
@@ -17,7 +17,7 @@ interface RouterLike {
     options: Function;
     use: Function;
 }
-export declare const fileBasedRoutes: (routesDir: string, schema?: object, { verbose, prefix, validateRouteParams, validateRequestBody, errHandler, }?: Partial<AddFileBasedRoutesOptions>) => Promise<{
+export declare const fileBasedRoutes: (routesDir: string, schema?: object, { verbose, prefix, validateParams, validateRequestBody, errHandler, }?: Partial<AddFileBasedRoutesOptions>) => Promise<{
     apply: (app: Partial<RouterLike> | Express | Application) => any;
     schema: any;
 }>;
