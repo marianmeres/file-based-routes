@@ -272,16 +272,21 @@ const _buildSchema = (paths, components, existing = {}) =>
 
 //
 const _createParamsValidator = (parameters: any[], components, errHandler = null) => {
+	const type = {};
 	const validator = (parameters || []).reduce((m, p) => {
-		if (p.name && p.schema) m[p.name] = ajv.compile(p.schema);
+		if (p.name && p.schema) {
+			m[p.name] = ajv.compile(p.schema);
+			type[p.name] = p.in === 'query' ? 'query' : 'params';
+		}
 		return m;
 	}, {});
 	return (req: Request, res: Response, next: NextFunction) => {
 		try {
 			Object.entries(validator).forEach((entry: any) => {
 				const [name, validate] = entry;
-				if (!(validate as any)(req.params[name])) {
-					const e: any = new ValidationError(`Param '${name}' is not valid`);
+				// if (!(validate as any)(req.params[name])) {
+				if (!(validate as any)(req[type[name]][name])) {
+					const e: any = new ValidationError(`Param '${name}' (in ${type[name]}) is not valid`);
 					e.errors = validate.errors;
 					e.status = 400; // bad request
 					throw e;
