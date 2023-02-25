@@ -6,15 +6,14 @@ export const parameters = (params, other = {}) => merge({}, other, {
         if (typeof p === 'string')
             p = { name: p };
         if (p.name) {
-            const _in = p.in || 'path';
-            const required = p.required !== undefined ? p.required : true;
             const schema = p.schema || { type: 'string' };
-            m.push({
-                in: _in,
-                name: p.name,
-                required,
-                schema,
-            });
+            const spec = { in: p.in || 'path', name: p.name, schema };
+            // By default, OpenAPI treats all request parameters as optional. You can
+            // add required: true to mark a parameter as required. Note that path
+            // parameters must have required: true, because they are always required.
+            if (p.required === true || spec.in === 'path')
+                spec.required = true;
+            m.push(spec);
         }
         return m;
     }, []),
