@@ -1,9 +1,10 @@
 {
   "name": "@marianmeres/file-based-routes",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Mirror filesystem to express app (or similar) endpoints.",
   "type": "module",
   "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -33,7 +34,7 @@
   },
   "homepage": "https://github.com/marianmeres/file-based-routes#readme",
   "devDependencies": {
-    "@marianmeres/release": "^0.0.7",
+    "@marianmeres/release": "^0.0.9",
     "@marianmeres/test-runner": "^2.0.13",
     "@types/node": "^18.11.9",
     "body-parser": "^1.20.1",
