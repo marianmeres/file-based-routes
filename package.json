@@ -1,6 +1,6 @@
 {
 	"name": "@marianmeres/file-based-routes",
-	"version": "0.0.13",
+	"version": "1.0.0",
 	"description": "Mirror filesystem to express app (or similar) endpoints.",
 	"type": "module",
 	"main": "./dist/index.js",
@@ -15,7 +15,9 @@
 		"build": "npm run clean && tsc -p tsconfig.json",
 		"dev": "npm run clean && tsc -w",
 		"test": "test-runner",
-		"release": "release",
+		"release": "release -v minor",
+		"release:patch": "release -v patch",
+		"release:major": "release -v major",
 		"test:watch": "nodemon -q -w dist -w tests -x test-runner --",
 		"test-server": "nodemon -q -w tests/server-routes -w tests/app.js tests/app.js"
 	},
