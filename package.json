@@ -1,61 +1,61 @@
 {
-  "name": "@marianmeres/file-based-routes",
-  "version": "0.0.13",
-  "description": "Mirror filesystem to express app (or similar) endpoints.",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "clean": "rimraf dist/*",
-    "prettier": "prettier --write \"{src,tests}/**/*.{js,ts,json}\"",
-    "xxx-build": "npm run clean && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
-    "build": "npm run clean && tsc -p tsconfig.json",
-    "dev": "npm run clean && tsc -w",
-    "test": "test-runner",
-    "release": "release",
-    "test:watch": "nodemon -q -w dist -w tests -x test-runner --",
-    "test-server": "nodemon -q -w tests/server-routes -w tests/app.js tests/app.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/marianmeres/file-based-routes.git"
-  },
-  "keywords": [
-    "express",
-    "router"
-  ],
-  "author": "Marian Meres <marian@meres.sk>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/marianmeres/file-based-routes/issues"
-  },
-  "homepage": "https://github.com/marianmeres/file-based-routes#readme",
-  "devDependencies": {
-    "@marianmeres/release": "^0.0.9",
-    "@marianmeres/test-runner": "^2.0.13",
-    "@types/node": "^18.11.9",
-    "body-parser": "^1.20.1",
-    "compression": "^1.7.4",
-    "express": "^4.18.2",
-    "express-openapi-validator": "^5.0.2",
-    "install": "^0.13.0",
-    "kleur": "^4.1.5",
-    "npm": "^9.1.1",
-    "prettier": "^2.7.1",
-    "rimraf": "^3.0.2",
-    "swagger-ui-express": "^4.6.0",
-    "typescript": "^4.8.4",
-    "undici": "^5.12.0"
-  },
-  "dependencies": {
-    "@marianmeres/clog": "^0.5.0",
-    "@polka/send-type": "^0.5.2",
-    "ajv": "^8.11.0",
-    "js-yaml": "^4.1.0",
-    "lodash": "^4.17.21",
-    "totalist": "^3.0.0"
-  }
+	"name": "@marianmeres/file-based-routes",
+	"version": "0.0.13",
+	"description": "Mirror filesystem to express app (or similar) endpoints.",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"clean": "rimraf dist/*",
+		"prettier": "prettier --write \"{src,tests}/**/*.{js,ts,json}\"",
+		"xxx-build": "npm run clean && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
+		"build": "npm run clean && tsc -p tsconfig.json",
+		"dev": "npm run clean && tsc -w",
+		"test": "test-runner",
+		"release": "release",
+		"test:watch": "nodemon -q -w dist -w tests -x test-runner --",
+		"test-server": "nodemon -q -w tests/server-routes -w tests/app.js tests/app.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/marianmeres/file-based-routes.git"
+	},
+	"keywords": [
+		"express",
+		"router"
+	],
+	"author": "Marian Meres <marian@meres.sk>",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/marianmeres/file-based-routes/issues"
+	},
+	"homepage": "https://github.com/marianmeres/file-based-routes#readme",
+	"devDependencies": {
+		"@marianmeres/release": "^1.1.0",
+		"@marianmeres/test-runner": "^2.0.13",
+		"@types/node": "^18.11.9",
+		"body-parser": "^1.20.1",
+		"compression": "^1.7.4",
+		"express": "^4.18.2",
+		"express-openapi-validator": "^5.0.2",
+		"install": "^0.13.0",
+		"kleur": "^4.1.5",
+		"npm": "^9.1.1",
+		"prettier": "^2.7.1",
+		"rimraf": "^3.0.2",
+		"swagger-ui-express": "^4.6.0",
+		"typescript": "^4.8.4",
+		"undici": "^5.12.0"
+	},
+	"dependencies": {
+		"@marianmeres/clog": "^0.5.0",
+		"@polka/send-type": "^0.5.2",
+		"ajv": "^8.11.0",
+		"js-yaml": "^4.1.0",
+		"lodash": "^4.17.21",
+		"totalist": "^3.0.0"
+	}
 }
