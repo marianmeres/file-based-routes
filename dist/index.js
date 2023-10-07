@@ -1,10 +1,10 @@
+import { createClog } from '@marianmeres/clog';
+import Ajv from 'ajv';
+import merge from 'lodash/merge.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { totalist } from 'totalist/sync';
-import merge from 'lodash/merge.js';
-import { createClog } from '@marianmeres/clog';
 import { isObject } from './lib/object.js';
-import Ajv from 'ajv';
 const clog = createClog('file-based-routes');
 const isFn = (v) => typeof v === 'function';
 class ValidationError extends Error {

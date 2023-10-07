@@ -1,11 +1,11 @@
+import { createClog } from '@marianmeres/clog';
+import Ajv from 'ajv';
+import { Application, Express, NextFunction, Request, Response } from 'express';
+import merge from 'lodash/merge.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { totalist } from 'totalist/sync';
-import merge from 'lodash/merge.js';
-import { createClog } from '@marianmeres/clog';
 import { isObject } from './lib/object.js';
-import Ajv from 'ajv';
-import { Express, Application, NextFunction, Request, Response } from 'express';
 
 const clog = createClog('file-based-routes');
 
@@ -19,21 +19,21 @@ interface AddFileBasedRoutesOptions {
 	// custom validators outside of the openapi schema
 	validateParams: boolean;
 	validateRequestBody: boolean;
-	// note "unconventional" signature
-	errHandler: (res, err, req) => void;
+	// note: unconventional signature
+	errHandler: (res: Response, err: Error, req: Request) => void;
 }
 
 interface RouterLike {
-	get: Function;
-	post: Function;
-	put: Function;
-	patch: Function;
-	del: Function;
-	delete: Function;
-	all: Function;
-	options: Function;
+	get: CallableFunction;
+	post: CallableFunction;
+	put: CallableFunction;
+	patch: CallableFunction;
+	del: CallableFunction;
+	delete: CallableFunction;
+	all: CallableFunction;
+	options: CallableFunction;
 	//
-	use: Function;
+	use: CallableFunction;
 }
 
 // @ts-ignore
