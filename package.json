@@ -1,6 +1,6 @@
 {
 	"name": "@marianmeres/file-based-routes",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Mirror filesystem to express app (or similar) endpoints.",
 	"type": "module",
 	"main": "./dist/index.js",
