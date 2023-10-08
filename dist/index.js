@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { totalist } from 'totalist/sync';
 import { isObject } from './lib/object.js';
+import { filterTopMost } from './lib/filter-topmost.js';
 const clog = createClog('file-based-routes');
 const isFn = (v) => typeof v === 'function';
 class ValidationError extends Error {
@@ -15,20 +16,32 @@ export const fileBasedRoutes = async (routesDir,
 // openapi schema into which the paths description will be deep merged (if available)
 schema = {}, { verbose = false, prefix = '', 
 // custom validators outside of the openapi validation (if any)
-validateParams = false, validateRequestBody = false, errHandler = null, } = {}) => {
+validateParams = false, validateRequestBody = false, errHandler = null, 
+//
+allowStaticDirs = true, } = {}) => {
     routesDir = path.normalize(routesDir);
     if (!fs.existsSync(routesDir)) {
         verbose && clog.warn(`Dir ${routesDir} not found...`);
-        return { apply: () => null, schema: null };
+        return { apply: () => null, schema: null, staticDirs: [] };
     }
     const dirLabel = routesDir.slice(process.cwd().length);
     // prettier-ignore
     verbose && clog(`--> ${dirLabel} ${prefix ? `(prefix '${prefix}')` : ''} ...`);
     // if any segment starts with "_", consider it hidden (won't be added to router)
     const isForbidden = (name) => name.split('/').some((v) => v.startsWith('_'));
+    const isStatic = (name) => name.split('/').at(-1) === '.static';
     const files = [];
+    let staticDirs = [];
+    const _staticMeta = {};
     totalist(routesDir, (name, abs, stats) => {
-        if (/\.js$/.test(name) && !isForbidden(name)) {
+        // static check first
+        if (isStatic(name)) {
+            const route = `${prefix}/` + path.dirname(name);
+            allowStaticDirs && staticDirs.push(route);
+            _staticMeta[route] = path.dirname(abs);
+        }
+        //
+        else if (/\.js$/.test(name) && !isForbidden(name)) {
             // remove extension, and "index" means parent directory root
             files.push({
                 route: `${prefix}/` + name.slice(0, -3).replace(/(^|\/)index$/, ''),
@@ -36,8 +49,10 @@ validateParams = false, validateRequestBody = false, errHandler = null, } = {}) 
             });
         }
     });
+    staticDirs = filterTopMost(staticDirs).map((v) => ({ route: v, abs: _staticMeta[v] }));
     // the order SHOULD NOT matter... (but sort it anyway)
     files.sort((a, b) => a.route.localeCompare(b.route));
+    // clog(JSON.stringify(staticDirs, null, 2));
     const _seen = {};
     // https://swagger.io/docs/specification/paths-and-operations/
     let schemaPaths = {};
@@ -182,6 +197,7 @@ validateParams = false, validateRequestBody = false, errHandler = null, } = {}) 
                 await fn(app);
         },
         schema: _buildSchema(schemaPaths, schemaComponents, schema),
+        staticDirs,
     };
 };
 //

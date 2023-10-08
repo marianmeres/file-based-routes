@@ -106,4 +106,19 @@ suite.test(
 	}
 );
 
+suite.test('static dirs works', async () => {
+	let r = await fetch(url(`/foo/bar/baz.txt`));
+	assert(r.ok);
+	assert('bat', await r.text());
+
+	// must not be confused with '.static' sub dir
+	assert('ola', await (await fetch(url(`/foo/bar/ha/.static/readme.txt`))).text());
+	// few more
+	assert('ho', await (await fetch(url(`/also-static/hey.txt`))).text());
+	assert('some', await (await fetch(url(`/some/static/file.txt`))).text());
+
+	//
+	assert(!(await fetch(url(`/empty`)).ok));
+});
+
 export default suite;

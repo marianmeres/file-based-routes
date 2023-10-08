@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { totalist } from 'totalist/sync';
 import { isObject } from './lib/object.js';
+import { filterTopMost } from './lib/filter-topmost.js';
 
 const clog = createClog('file-based-routes');
 
@@ -21,6 +22,8 @@ interface AddFileBasedRoutesOptions {
 	validateRequestBody: boolean;
 	// note: unconventional signature
 	errHandler: (res: Response, err: Error, req: Request) => void;
+	//
+	allowStaticDirs: boolean;
 }
 
 interface RouterLike {
@@ -50,15 +53,18 @@ export const fileBasedRoutes = async (
 		validateParams = false,
 		validateRequestBody = false,
 		errHandler = null,
+		//
+		allowStaticDirs = true,
 	}: Partial<AddFileBasedRoutesOptions> = {}
 ): Promise<{
 	apply: (app: Partial<RouterLike> | Express | Application) => any;
 	schema: any;
+	staticDirs: { route: string; abs: string }[];
 }> => {
 	routesDir = path.normalize(routesDir);
 	if (!fs.existsSync(routesDir)) {
 		verbose && clog.warn(`Dir ${routesDir} not found...`);
-		return { apply: () => null, schema: null };
+		return { apply: () => null, schema: null, staticDirs: [] };
 	}
 
 	const dirLabel = routesDir.slice(process.cwd().length);
@@ -67,10 +73,20 @@ export const fileBasedRoutes = async (
 
 	// if any segment starts with "_", consider it hidden (won't be added to router)
 	const isForbidden = (name) => name.split('/').some((v) => v.startsWith('_'));
+	const isStatic = (name) => name.split('/').at(-1) === '.static';
 
 	const files = [];
+	let staticDirs = [];
+	const _staticMeta = {};
 	totalist(routesDir, (name, abs, stats) => {
-		if (/\.js$/.test(name) && !isForbidden(name)) {
+		// static check first
+		if (isStatic(name)) {
+			const route = `${prefix}/` + path.dirname(name);
+			allowStaticDirs && staticDirs.push(route);
+			_staticMeta[route] = path.dirname(abs);
+		}
+		//
+		else if (/\.js$/.test(name) && !isForbidden(name)) {
 			// remove extension, and "index" means parent directory root
 			files.push({
 				route: `${prefix}/` + name.slice(0, -3).replace(/(^|\/)index$/, ''),
@@ -79,8 +95,12 @@ export const fileBasedRoutes = async (
 		}
 	});
 
+	staticDirs = filterTopMost(staticDirs).map((v) => ({ route: v, abs: _staticMeta[v] }));
+
 	// the order SHOULD NOT matter... (but sort it anyway)
 	files.sort((a, b) => a.route.localeCompare(b.route));
+
+	// clog(JSON.stringify(staticDirs, null, 2));
 
 	const _seen = {};
 
@@ -263,6 +283,7 @@ export const fileBasedRoutes = async (
 			for (const fn of methodFns) await fn(app);
 		},
 		schema: _buildSchema(schemaPaths, schemaComponents, schema),
+		staticDirs,
 	};
 };
 

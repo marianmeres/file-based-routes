@@ -79,6 +79,12 @@ app.listen(PORT, HOST, async () => {
 	// (id doesn't seem to support direct data spec)
 	fs.writeFileSync(schemaPath, JSON.stringify(fbr1.schema, null, '\t'));
 
+	// static must come first
+	fbr1.staticDirs.forEach(({ route, abs }) => {
+		clog.debug(`static: ${route} -> ${abs}`);
+		app.use(route, express.static(abs, { fallthrough: false }));
+	});
+
 	//
 	clog(`Using open api validator middleware...`);
 	app.use(

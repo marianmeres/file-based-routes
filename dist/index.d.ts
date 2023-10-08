@@ -5,6 +5,7 @@ interface AddFileBasedRoutesOptions {
     validateParams: boolean;
     validateRequestBody: boolean;
     errHandler: (res: Response, err: Error, req: Request) => void;
+    allowStaticDirs: boolean;
 }
 interface RouterLike {
     get: CallableFunction;
@@ -17,8 +18,12 @@ interface RouterLike {
     options: CallableFunction;
     use: CallableFunction;
 }
-export declare const fileBasedRoutes: (routesDir: string, schema?: object, { verbose, prefix, validateParams, validateRequestBody, errHandler, }?: Partial<AddFileBasedRoutesOptions>) => Promise<{
+export declare const fileBasedRoutes: (routesDir: string, schema?: object, { verbose, prefix, validateParams, validateRequestBody, errHandler, allowStaticDirs, }?: Partial<AddFileBasedRoutesOptions>) => Promise<{
     apply: (app: Partial<RouterLike> | Express | Application) => any;
     schema: any;
+    staticDirs: {
+        route: string;
+        abs: string;
+    }[];
 }>;
 export {};
