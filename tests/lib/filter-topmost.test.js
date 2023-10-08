@@ -13,4 +13,10 @@ suite.test('test runner sanity check template', () => {
 	assert(isEqual(expected, actual));
 });
 
+suite.only('test runner sanity check template', () => {
+	const expected = ['/foo/bar'];
+	const actual = filterTopMost(['/foo/bar']);
+	assert(isEqual(expected, actual));
+});
+
 export default suite;

@@ -2,6 +2,7 @@
 export const filterTopMost = (list: string[]) => {
 	let topmost = [];
 	list = [...list].sort();
+	// console.log(111, list);
 
 	// quick-n-dirty, probably not the most optimal way... but this runs only once on
 	// server bootstrap
@@ -13,11 +14,17 @@ export const filterTopMost = (list: string[]) => {
 			blacklist.push(`${d}/`);
 		}
 	}
+	// console.log(222, blacklist);
 
 	// 2. actual filter
-	for (let d of blacklist) {
-		topmost = [...topmost, ...list.filter((v) => !v.startsWith(d))];
+	if (blacklist.length) {
+		for (let d of blacklist) {
+			topmost = [...topmost, ...list.filter((v) => !v.startsWith(d))];
+		}
+	} else {
+		topmost = list;
 	}
+	// console.log(333, topmost);
 
 	return topmost;
 };
