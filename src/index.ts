@@ -279,8 +279,8 @@ export const fileBasedRoutes = async (
 	verbose && clog(`✔ ${dirLabel}`);
 
 	return {
-		apply: async (app) => {
-			for (const fn of methodFns) await fn(app);
+		apply: (app) => {
+			for (const fn of methodFns) fn(app);
 		},
 		schema: _buildSchema(schemaPaths, schemaComponents, schema),
 		staticDirs,

@@ -192,9 +192,9 @@ allowStaticDirs = true, } = {}) => {
     }
     verbose && clog(`✔ ${dirLabel}`);
     return {
-        apply: async (app) => {
+        apply: (app) => {
             for (const fn of methodFns)
-                await fn(app);
+                fn(app);
         },
         schema: _buildSchema(schemaPaths, schemaComponents, schema),
         staticDirs,
