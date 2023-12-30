@@ -171,8 +171,8 @@ allowStaticDirs = true, } = {}) => {
                         schemaPaths = merge({}, schemaPaths, paths);
                     }
                     // collect all "method" functions into an array...
-                    methodFns.push(async (app) => {
-                        const handlerFn = await createHandlerFn(app, route, method);
+                    methodFns.push((app) => {
+                        const handlerFn = createHandlerFn(app, route, method);
                         // note: NOT polka compatible...
                         app[method](route, middlewares, async (req, res, next) => {
                             try {

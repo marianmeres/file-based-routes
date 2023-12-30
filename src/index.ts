@@ -254,8 +254,8 @@ export const fileBasedRoutes = async (
 					}
 
 					// collect all "method" functions into an array...
-					methodFns.push(async (app: Partial<RouterLike>) => {
-						const handlerFn = await createHandlerFn(app, route, method);
+					methodFns.push((app: Partial<RouterLike>) => {
+						const handlerFn = createHandlerFn(app, route, method);
 						// note: NOT polka compatible...
 						app[method](
 							route,
